@@ -1,31 +1,43 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import App from './App.tsx'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import Login from './Components/Login.tsx'
-import Register from './Components/Register.tsx'
-import Blog from './Components/Blog.tsx'
-import NotFoundPage from './Components/NotFoundPage.tsx'
+import Login from './Pages/Login.tsx'
+import Register from './Pages/Register.tsx'
+import Blog from './Pages/Blog.tsx'
+import NotFoundPage from './Pages/NotFoundPage.tsx'
+import RootPage from './Pages/RootPage.tsx'
+import Home from './Pages/Home.tsx'
+import Calender from './Pages/Calender.tsx'
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <App />,
-    errorElement: <NotFoundPage />
-  }, 
-  {
-    path: '/login',
-    element: <Login />
+    element: <RootPage />,
+    errorElement: <NotFoundPage />,
+    children: [
+      {
+        path: '/',
+        element: <Home />,
+      }, 
+      {
+        path: '/Calender',
+        element: <Calender />,
+      }, 
+      {
+        path: '/login',
+        element: <Login />
+      },
+      {
+        path: '/register',
+        element: <Register />
+      },
+      {
+        path: '/blog',
+        element: <Blog />
+      }
+    ]
   },
-  {
-    path: '/register',
-    element: <Register />
-  },
-  {
-    path: '/blog',
-    element: <Blog />
-  }
 ]);
 
 createRoot(document.getElementById('root')!).render(
