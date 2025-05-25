@@ -1,0 +1,7 @@
+Amaç	Light Mode	Dark Mode
+Arka Plan	#FFFFFF (white)	#121212 (çok koyu gri)
+Metin	#333333 (dark gray)	#F4F4F4 (açık gri/beyaz)
+Primary	#2ECC71 (yeşil)	#2ECC71 (değişmeden kalabilir)
+Secondary	#F4F4F4 (light gray)	#1F1F1F (koyu gri)
+Hover Yeşil	#27AE60	#27AE60
+Borderlar	#E5E7EB (tailwind'de gray-200)	#333333
