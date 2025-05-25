@@ -6,9 +6,7 @@ export default function RootPage() {
     return(
         <div className="flex flex-col min-h-screen">
             <Header />
-            <main className="grow">
-                <Outlet />
-            </main>
+            <Outlet />
             <Footer />
         </div>
     );

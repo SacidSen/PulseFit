@@ -8,6 +8,7 @@ import Blog from './Pages/Blog.tsx'
 import NotFoundPage from './Pages/NotFoundPage.tsx'
 import RootPage from './Pages/RootPage.tsx'
 import Home from './Pages/Home.tsx'
+import Plan from './Pages/Plan.tsx'
 import Calender from './Pages/Calender.tsx'
 
 const router = createBrowserRouter([
@@ -35,6 +36,10 @@ const router = createBrowserRouter([
       {
         path: '/blog',
         element: <Blog />
+      },
+      {
+        path: '/plan',
+        element: <Plan />
       }
     ]
   },

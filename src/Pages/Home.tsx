@@ -5,7 +5,7 @@ import PersonalCard from "../Components/Header/PersonalCard";
 export default function Home() {
     return (
         <>
-            <section className="bg-[#121212]">
+            <section className="bg-[#121212] mt-24">
                 <div className="max-w-6xl mx-auto flex justify-between">
                     <div className="w-1/2 flex flex-col items-center justify-center">
                         <h2 className="text-left text-white">Welcome to Pulse Fit</h2>
@@ -41,7 +41,7 @@ export default function Home() {
                 <p className="max-w-2xl">From sets, reps, tempo, and rest times, you have complete control over how you want to write it and how you want to present it.</p>
                 <a className="bg-green-600 hover:bg-green-400 px-3 py-1 rounded font-semibold text-white text-sm" href="/register">Get Started</a>
             </section>
-            <section className="max-w-6xl mx-auto">
+            <section className="max-w-6xl mb-20 mx-auto">
                 <h1 className="text-2xl uppercase tect-primary font-bold text-gray-800">How to Create a Personalized Workout Plan</h1>
                 <p className="mt-4">One of the most important things to consider when creating your custom workout plan is what you want to achieve.</p>
                 <div className="flex mt-14">
