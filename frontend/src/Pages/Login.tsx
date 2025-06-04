@@ -27,7 +27,7 @@ export default function Login() {
                     type="submit"
                     className="w-full cursor-pointer bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
                 >
-                    Loign
+                    Login
                 </button>
               <p className="text-sm mt-1">Don't have an account? <a className="text-green-500 font-semibold" href="/register">SignUp</a></p>
               </div>
