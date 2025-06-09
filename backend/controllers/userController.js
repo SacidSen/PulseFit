@@ -1,4 +1,6 @@
 const User = require('../models/user');
+const getCurrentUser = require('../service/user');
+const jwt = require('jsonwebtoken');
 
 const generateToken = async (user, statusCode, res) => {
   const token = await user.jwtGenerateToken();
@@ -73,8 +75,49 @@ const logoutUser = async(req,res) => {
   
 };
 
+
+const getMe = async (req, res) => {
+  try {
+    const token = req.cookies.token || req.header('Authorization')?.replace('Bearer ', '');
+
+    if (!token) {
+      return res.status(401).json({ success: false, message: 'Token bulunamadı' });
+    }
+
+    const user = await getCurrentUser(token);
+
+    // Optional: re-sign the token if you want to refresh the cookie
+    const newToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRE,
+    });
+
+    const options = {
+      expires: new Date(Date.now() + Number(process.env.JWT_EXPIRE)),
+      httpOnly: true,
+    };
+
+    res
+      .status(200)
+      .cookie('token', newToken, options)
+      .json({
+        success: true,
+        token: newToken,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+        },
+      });
+  } catch (error) {
+    console.error(error);
+    res.status(401).json({ success: false, message: error.message || 'Yetkisiz' });
+  }
+};
+
+
 module.exports = {
   register: registerUser,
   login: loginUser,
   logout : logoutUser,
+  getMe: getMe
 };
