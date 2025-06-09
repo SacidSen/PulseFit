@@ -1,8 +1,4 @@
-interface Workout {
-    title: string
-}
-
-export default function WorkoutCard({title} : Workout) {
+export default function WorkoutCard() {
     // , consistency, ambition, gender, image
     return(
         <div className="h-fit min-w-1/4 w-1/4 px-4 mb-10">
@@ -10,7 +6,7 @@ export default function WorkoutCard({title} : Workout) {
                 <img className="rounded-tr-md rounded-tl-md" src="Workout_Image-1.png" alt="Workout_Image" />
                 <div className="flex grow flex-col justify-center items-center px-2">
                     <h1 className="font-semibold uppercase mt-2 text-center">
-                        {title}
+                        Your workout plan
                     </h1>
                     <h2 className="text-red-600 mb-2">Workout Plan</h2>
                     <div className="flex items-center flex-wrap justify-center">
