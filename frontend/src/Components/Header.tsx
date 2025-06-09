@@ -1,40 +1,46 @@
 import { Link } from "react-router-dom";
-// import { useState, useEffect } from "react";
+import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
+import useSignOut from "react-auth-kit/hooks/useSignOut";
+import { useNavigate } from "react-router-dom";
 
 export default function Header() {
-    // const [isScrolled, setIsScrolled] = useState(false);
+  const isAuthenticated = useIsAuthenticated();
+  const signOut = useSignOut();
+  const navigate = useNavigate();
 
-    // useEffect(() => {
-    //     const handleScroll = () => {
-    //         if(window.scrollY > 90) {
-    //             setIsScrolled(true);
-    //         }else {
-    //             setIsScrolled(false);
-    //         }
-    //     };
+  const handleLogout = () => {
+    signOut();
+    navigate("/login");
+  };
 
-    //     window.addEventListener('scroll', handleScroll);
-
-    //     return() => {
-    //         window.addEventListener('scroll', handleScroll);
-    //     }
-    // }, [])
-    return(
-        // ${isScrolled ? "h-18" : "h-24"}
-        <header className={`bg-white w-full fixed top-0 transition-all ease-in-out z-10`}>
-            <div className="max-w-6xl font-semibold uppercase mx-auto flex items-center justify-between">
-                <Link to="/">
-                    <img className="w-22" src="logo.png" alt="logo" />
-                </Link>
-                <div className="flex gap-x-8">
-                    <Link className="hover:text-green-600" to="/">Home</Link>
-                    <Link className="hover:text-green-600" to="/login">Login</Link>
-                    <Link className="hover:text-green-600" to="/register">Register</Link>
-                    <Link className="hover:text-green-600" to="/blog">Blog</Link>
-                    <Link className="hover:text-green-600" to="/calender">Calender</Link>
-                    <Link className="hover:text-green-600" to="/plan">Plan</Link>
-                </div>
-            </div>
-        </header>
-    )
+  return (
+    <header className="bg-white w-full fixed top-0 transition-all ease-in-out z-10">
+      <div className="max-w-6xl font-semibold uppercase mx-auto flex items-center justify-between py-1 px-6">
+        <Link to="/">
+          <img className="w-20 object-contain" src="logo.png" alt="logo" />
+        </Link>
+        <div className="flex gap-x-8 items-center">
+          <Link className="hover:text-green-600" to="/">Home</Link>
+          {!isAuthenticated && (
+            <>
+              <Link className="hover:text-green-600" to="/login">Login</Link>
+              <Link className="hover:text-green-600" to="/register">Register</Link>
+            </>
+          )}
+          {isAuthenticated && (
+            <>
+              <Link className="hover:text-green-600" to="/calender">Calender</Link>
+              <Link className="hover:text-green-600" to="/workoutPlan">Workout Plans</Link>
+              <button
+                onClick={handleLogout}
+                className="hover:opacity-60 uppercase bg-red-600 text-white px-2 py-0.5 rounded text-sm cursor-pointer"
+              >
+                Logout
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </header>
+  );
 }

@@ -4,12 +4,21 @@ import './index.css'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Login from './Pages/Login.tsx'
 import Register from './Pages/Register.tsx'
-import Blog from './Pages/Blog.tsx'
 import NotFoundPage from './Pages/NotFoundPage.tsx'
 import RootPage from './Pages/RootPage.tsx'
-import Home from './Pages/Home.tsx'
-import Plan from './Pages/Plan.tsx'
+import Home from './Pages/Home.tsx' 
 import Calender from './Pages/Calender.tsx'
+import WorkoutPlan from './Pages/WorkoutPlan.tsx'
+import AuthProvider from 'react-auth-kit'
+import createStore from 'react-auth-kit/createStore'
+import ProtectedRoute from './Components/ProtectedRoute' // import your new component
+
+export const store = createStore({
+  authName: '_auth',
+  authType: 'cookie',
+  cookieDomain: window.location.hostname,
+  cookieSecure: window.location.protocol === 'https:',
+});
 
 const router = createBrowserRouter([
   {
@@ -20,33 +29,39 @@ const router = createBrowserRouter([
       {
         path: '/',
         element: <Home />,
-      }, 
-      {
-        path: '/Calender',
-        element: <Calender />,
-      }, 
+      },
       {
         path: '/login',
-        element: <Login />
+        element: <Login />,
       },
       {
         path: '/register',
-        element: <Register />
+        element: <Register />,
       },
       {
-        path: '/blog',
-        element: <Blog />
+        path: '/calender',
+        element: (
+          <ProtectedRoute>
+            <Calender />
+          </ProtectedRoute>
+        ),
       },
       {
-        path: '/plan',
-        element: <Plan />
-      }
-    ]
+        path: '/WorkoutPlan',
+        element: (
+          <ProtectedRoute>
+            <WorkoutPlan />
+          </ProtectedRoute>
+        ),
+      },
+    ],
   },
 ]);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <AuthProvider store={store}>
+      <RouterProvider router={router} />
+    </AuthProvider>
   </StrictMode>,
 );
