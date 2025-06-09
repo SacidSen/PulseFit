@@ -1,13 +1,16 @@
-export default function Workout() {
-    // props: {title, consistency, ambition, gender, image}
+interface Workout {
+    title: string
+}
+
+export default function WorkoutCard({title} : Workout) {
+    // , consistency, ambition, gender, image
     return(
         <div className="h-fit min-w-1/4 w-1/4 px-4 mb-10">
             <div className="border rounded-md border-gray-400 h-full flex items-center flex-col">
                 <img className="rounded-tr-md rounded-tl-md" src="Workout_Image-1.png" alt="Workout_Image" />
                 <div className="flex grow flex-col justify-center items-center px-2">
                     <h1 className="font-semibold uppercase mt-2 text-center">
-                        {/* {title} */}
-                        6-Month Bodybuilding Program
+                        {title}
                     </h1>
                     <h2 className="text-red-600 mb-2">Workout Plan</h2>
                     <div className="flex items-center flex-wrap justify-center">

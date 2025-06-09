@@ -64,8 +64,8 @@ export default function ExercisePage() {
 
             <section className="border bg-[#f9f9f9] border-b-[#e3e3e3] h-20 w-full flex justify-center items-center">
                 <div className="flex items-center">
-                    <button className="bg-green-600 mr-2 cursor-pointer flex hover:opacity-75 px-3 py-1 rounded font-semibold text-white text-sm">
-                        <p onClick={() => setShowExercise(!showExercise)} className="mr-2">Add Workout Plan</p>
+                    <button onClick={() => setShowExercise(!showExercise)} className="bg-green-600 mr-2 cursor-pointer flex hover:opacity-75 px-3 py-1 rounded font-semibold text-white text-sm">
+                        <p className="mr-2">Add Workout Plan</p>
                         <svg viewBox="0 0 24 24" width="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" className="css-i6dzq1">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -79,9 +79,8 @@ export default function ExercisePage() {
             </section>
 
             {/* exercises */}
-            {(
-                <div className="h-full w-full flex justify-center bg-[#121212af] items-center fixed top-0 left-0 z-20">
-                    <div ref={modalRef} className="max-w-1/5 h-fit shadow-2xl rounded-lg bg-[#1c1c1c]">
+            {showExercise && (<div className="h-full w-full flex justify-center bg-[#121212af] items-center fixed top-0 left-0 z-20">
+                    <div ref={modalRef} className="max-w-1/4 h-fit shadow-2xl rounded-lg bg-[#1c1c1c]">
                         <section className="w-full rounded-tr-lg rounded-tl-lg h-42 bg-[#0f0f0f]">
                             <div className="px-4 flex items-center h-full">
                             {isEditingTitle ? (
@@ -125,17 +124,17 @@ export default function ExercisePage() {
                                     name={exerciseItem.name}
                                 />
                             ))}
+                            <div className="flex mx-4 justify-center w-full">
+                                <input className="text-white border rounded px-2 w-1/2" type="date" /> 
+                                <p className="mx-2 text-white">bis</p>
+                                <input className="text-white border rounded px-2 w-1/2" type="date" />
+                            </div>
                             <button
                                 onClick={() => setShowExercise(!showExercise)}
-                                className="bg-blue-600 text-white px-2 py-0.5 rounded text-semibold ml-4 hover:opacity-75 cursor-pointer"
+                                className="bg-blue-600 mt-5 text-white px-2 py-0.5 rounded text-semibold ml-4 hover:opacity-75 cursor-pointer"
                             >
                                 Save
                             </button>
-                            <div className="flex ml-4 mt-2">
-                                <input className="text-white" type="date" /> 
-                                <p className="mx-2 text-white">bis</p>
-                                <input className="text-white" type="date" />
-                            </div>
                             <Pagination
                                 currentPage={currentPage}
                                 totalPosts={filteredExercises.length}
