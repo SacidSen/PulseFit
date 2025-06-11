@@ -19,10 +19,16 @@ export default function Login() {
     try {
       const response = await axios.post(
         "http://localhost:8000/api/users/login",
+        
         { email, password }
       );
-  
+      console.log("BACKEND'DEN GELEN CEVAP:", response.data);
       setSuccess("Login successful! Redirecting...");
+
+     localStorage.setItem("user", JSON.stringify({
+        id: response.data.user.id,
+        email: response.data.user.email
+      }));
   
       signIn({
         auth: {

@@ -75,7 +75,7 @@ export default function ExercisePage() {
             </section>
 
             <section className="mx-auto max-w-6xl mt-12 flex flex-wrap">
-                <Workout />
+                <Workout workoutName={""} startDate={""} endDate={""} startTime={""} endTime={""} exercises={[]} />
             </section>
 
             {/* exercises */}

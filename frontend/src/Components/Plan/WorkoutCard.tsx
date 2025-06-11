@@ -1,4 +1,13 @@
-export default function WorkoutCard() {
+interface WorkoutCardProps {
+    workoutName: string;
+    startDate: string;
+    endDate: string;
+    startTime: string;
+    endTime: string;
+    exercises: any[];
+}
+
+export default function WorkoutCard({ workoutName, startDate, endDate, startTime, endTime, exercises }: WorkoutCardProps) {
     // , consistency, ambition, gender, image
     return(
         <div className="h-fit min-w-1/4 w-1/4 px-4 mb-10">
@@ -6,7 +15,7 @@ export default function WorkoutCard() {
                 <img className="rounded-tr-md rounded-tl-md" src="Workout_Image-1.png" alt="Workout_Image" />
                 <div className="flex grow flex-col justify-center items-center px-2">
                     <h1 className="font-semibold uppercase mt-2 text-center">
-                        Your workout plan
+                        {workoutName}
                     </h1>
                     <h2 className="text-red-600 mb-2">Workout Plan</h2>
                     <div className="flex items-center flex-wrap justify-center">
@@ -31,7 +40,7 @@ export default function WorkoutCard() {
                             <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0"/>
                             </svg>
                             {/* <p>{consistency}</p> */}
-                            <p className="font-semibold text-sm ml-1">4 Weeks</p>
+                            <p className="font-semibold text-sm ml-1">{startDate} - {endDate}</p>
                         </div>
                     </div>
                     <div className="flex w-full justify-end my-4">
