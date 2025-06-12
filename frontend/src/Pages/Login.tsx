@@ -24,11 +24,12 @@ export default function Login() {
       );
       console.log("BACKEND'DEN GELEN CEVAP:", response.data);
       setSuccess("Login successful! Redirecting...");
+      localStorage.setItem("user", JSON.stringify({
+      id: response.data.user.id,
+      email: response.data.user.email
 
-     localStorage.setItem("user", JSON.stringify({
-        id: response.data.user.id,
-        email: response.data.user.email
-      }));
+     
+    }));
   
       signIn({
         auth: {

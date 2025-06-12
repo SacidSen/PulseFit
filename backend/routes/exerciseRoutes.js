@@ -14,4 +14,5 @@ router.put('/:id', exerciseController.updateExercise);
 // Egzersizi sil
 router.delete('/:id', exerciseController.deleteExercise);
 
+
 module.exports = router;

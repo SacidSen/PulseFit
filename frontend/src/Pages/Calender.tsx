@@ -19,24 +19,44 @@ interface WorkoutPlan {
   [key: string]: any;
 }
 
+interface CalendarEvent {
+  id: string;
+  title: string;
+  start: Date;
+  end: Date;
+  allDay: boolean;
+}
+
 export default function Calendar() {
   const [weekendsVisible, setWeekendsVisible] = useState(true);
-  const [currentEvents, setCurrentEvents] = useState<any[]>([]);
-  const [workoutPlans, setWorkoutPlans] = useState<WorkoutPlan[]>([]);
+  const [allWorkoutPlans, setAllWorkoutPlans] = useState<WorkoutPlan[]>([]);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [tooltipContent, setTooltipContent] = useState<string>('');
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showTooltip, setShowTooltip] = useState(false);
+  const [noWorkoutsMessage, setNoWorkoutsMessage] = useState(''); // <-- eklendi
 
   useEffect(() => {
-    // Login olan kullanıcıyı localStorage'dan çek
     const user = JSON.parse(localStorage.getItem("user") || "{}");
-    if (!user._id) return; // Kullanıcı login değilse, devam etme
+    const userId = user._id || user.id;
+    if (!userId) return;
 
-    // Sadece login olan kullanıcıya ait workoutları çek
-    fetch(`http://localhost:8000/api/workoutP/list?userId=${user._id}`)
+    fetch(`http://localhost:8000/api/workoutP/list?userId=${userId}`)
       .then((res) => res.json())
-      .then((data) => setWorkoutPlans(data))
-      .catch((err) => console.error(err));
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setAllWorkoutPlans(data);
+          setNoWorkoutsMessage('');
+        } else {
+          setAllWorkoutPlans([]);
+          setNoWorkoutsMessage('Henüz workout oluşturulmadı.');
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        setAllWorkoutPlans([]);
+        setNoWorkoutsMessage('Henüz workout oluşturulmadı.');
+      });
   }, []);
 
   function renderEventContent(eventInfo: any) {
@@ -53,7 +73,7 @@ export default function Calendar() {
   }
 
   function handleTooltipOpen(e: any, title: string) {
-    const workout = workoutPlans.find((w) => w.name === title);
+    const workout = allWorkoutPlans.find((w) => w.name === title);
     if (workout) {
       const content = `
         <div>
@@ -61,7 +81,7 @@ export default function Calendar() {
           ${workout.exercises
             .map(
               (ex) =>
-                `<div style="margin-bottom:2px;">${ex.name} - ${ex.sets}x${ex.reps}</div>`
+                `<div style="margin-bottom:2px;">${ex.name} - ${ex.sets ?? "-"}x${ex.reps ?? "-"}</div>`
             )
             .join('')}
         </div>
@@ -75,99 +95,95 @@ export default function Calendar() {
     setTooltipPosition({ x: e.pageX + 10, y: e.pageY + 10 });
   }
 
-  function handleEvents(events: any) {
-    setCurrentEvents(events);
+  function handleEvents(eventsList: any) {
+    // FullCalendar'ın state güncellemesi gerekirse kullanılabilir
   }
 
-  function handleDateSelect(selectInfo: any) {
-    const calendarApi = selectInfo.view.calendar;
-    calendarApi.unselect();
-
-    // Kullanılmamış workout'ları al
-    const usedWorkoutNames = currentEvents.map((evt) => evt.title);
-    const availableWorkoutPlans = workoutPlans.filter(
-      (wp) => !usedWorkoutNames.includes(wp.name)
-    );
-
-    const selectedName = prompt(
-      'Lütfen eklemek istediğiniz workout planın adını seçin:\n' +
-        availableWorkoutPlans.map((w) => w.name).join('\n')
-    );
-
-    if (!selectedName) return alert('Seçim yapılmadı.');
-
-    const selectedWorkout = availableWorkoutPlans.find((w) => w.name === selectedName);
-    if (!selectedWorkout) return alert('Workout bulunamadı');
-
-    const startDate = new Date(selectInfo.startStr);
-    const endDate = new Date(startDate);
-    endDate.setHours(startDate.getHours() + 1);
-
-    const eventList = [
-      {
-        id: createEventId(),
-        title: selectedWorkout.name,
-        start: startDate,
-        end: endDate,
-        allDay: false,
-      },
-    ];
-
-    if (
-      selectedWorkout.trainingTime &&
-      selectedWorkout.trainingTime > 1 &&
-      selectedWorkout.trainingTime < 2
-    ) {
-      const secondSlotStart = new Date(endDate);
-      const secondSlotEnd = new Date(secondSlotStart);
-      secondSlotEnd.setHours(secondSlotStart.getHours() + 1);
-
-      eventList.push({
-        id: createEventId(),
-        title: selectedWorkout.name,
-        start: secondSlotStart,
-        end: secondSlotEnd,
-        allDay: false,
-      });
-    }
-
-    for (const evt of eventList) {
-      calendarApi.addEvent(evt);
-    }
-
-    // Eklenen workout'ı listeden çıkar
-    setWorkoutPlans((prev) => prev.filter((w) => w.name !== selectedWorkout.name));
+ function handleDateSelect(selectInfo: any) {
+  if (allWorkoutPlans.length === 0) {
+    alert("Önce workout oluşturmalısınız!");
+    return;
   }
+
+  const selectedName = prompt(
+    'Lütfen eklemek istediğiniz workout planın adını seçin:\n' +
+      allWorkoutPlans.map((w) => w.name).join('\n')
+  );
+
+  if (!selectedName) return alert('Seçim yapılmadı.');
+
+  const selectedWorkout = allWorkoutPlans.find((w) => w.name === selectedName);
+  if (!selectedWorkout) return alert('Workout bulunamadı');
+
+  const startDate = new Date(selectInfo.startStr);
+  const endDate = new Date(startDate);
+  endDate.setHours(startDate.getHours() + 1);
+
+  // Event objesi
+  const newEvent = {
+    id: createEventId(),
+    title: selectedWorkout.name,
+    start: startDate,
+    end: endDate,
+    allDay: false,
+  };
+
+  console.log("YENİ EVENT:", newEvent);
+
+
+  // --------------- BACKEND'E GÖNDER -----------------
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  fetch('http://localhost:8000/api/calendar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userId: user._id || user.id,
+      workoutId: selectedWorkout._id,
+      start: startDate,
+      end: endDate,
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    console.log("Takvim event'i kaydedildi:", data);
+    // İstersen event'e id'yi de data'dan alabilirsin
+  })
+  .catch(err => {
+    console.error("Takvim event'i kaydedilemedi:", err);
+  });
+  // --------------- BACKEND'E GÖNDER BİTTİ -----------------
+
+  setEvents((prev) => [...prev, newEvent]);
+}
+
 
   function handleEventClick(clickInfo: any) {
     if (confirm(`Bu etkinliği silmek istediğinize emin misiniz? '${clickInfo.event.title}'`)) {
-      // Silinen workout'u tekrar eklenebilir hale getir
-      setWorkoutPlans((prev) => [
-        ...prev,
-        { name: clickInfo.event.title, exercises: [], _id: '', trainingTime: undefined },
-      ]);
+      setEvents((prev) => prev.filter((evt) => evt.id !== clickInfo.event.id));
       clickInfo.event.remove();
-      // Silme işleminden sonra tekrar workout ekleme arayüzünü göster
-      setTimeout(() => {
-        // Takvimde bir gün seçilmemiş olsa bile, kullanıcıya prompt göster
-        // Kullanıcıdan bir gün seçmesini isteyebiliriz veya otomatik olarak handleDateSelect'i tetikleyemeyiz
-        // Bu yüzden burada sadece prompt'u tekrar göstereceğiz
-        const usedWorkoutNames = currentEvents.map((evt) => evt.title).filter((name) => name !== clickInfo.event.title);
-        const availableWorkoutPlans = [
-          ...workoutPlans,
-          { name: clickInfo.event.title, exercises: [], _id: '', trainingTime: undefined },
-        ].filter((wp) => !usedWorkoutNames.includes(wp.name));
-        const selectedName = prompt(
-          'Lütfen eklemek istediğiniz workout planın adını seçin:\n' +
-            availableWorkoutPlans.map((w) => w.name).join('\n')
-        );
-        // Burada otomatik ekleme yapılmaz, sadece prompt gösterilir
-      }, 0);
     }
   }
 
   return (
     <main className="w-full h-screen grow mt-24 relative">
+      {/* Workout plan isimlerini başlık altında göster veya mesajı göster */}
+      {noWorkoutsMessage ? (
+        <div className="mb-4 p-4 bg-white rounded shadow text-center text-gray-500">
+          {noWorkoutsMessage}
+        </div>
+      ) : allWorkoutPlans.length > 0 && (
+        <div className="mb-4 p-4 bg-white rounded shadow">
+          <p className="font-semibold mb-2">
+            Lütfen eklemek istediğiniz workout planın adını seçin:
+          </p>
+          <ul className="list-disc list-inside">
+            {allWorkoutPlans.map((w) => (
+              <li key={w._id}>{w.name}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <FullCalendar
         plugins={[timeGridPlugin, interactionPlugin]}
         headerToolbar={false}
@@ -183,14 +199,14 @@ export default function Calendar() {
         slotLabelClassNames="text-gray-400 text-lg"
         dayCellClassNames="bg-white border border-gray-200"
         select={handleDateSelect}
-        editable={false} // Sürükleyerek taşıma devre dışı
+        editable={false}
         selectable={true}
         selectMirror={false}
         dayMaxEvents={true}
         weekends={weekendsVisible}
         eventClick={handleEventClick}
         eventsSet={handleEvents}
-        events={[]}
+        events={events}
         eventContent={renderEventContent}
         eventClassNames="bg-blue-500 bg-opacity-60 text-white border border-blue-400"
       />

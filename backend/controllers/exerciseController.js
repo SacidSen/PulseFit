@@ -38,6 +38,10 @@ exports.updateExercise = async (req, res) => {
     res.status(500).json({ error: 'Güncelleme başarısız' });
   }
 };
+// Workout modelini dahil etmeyi unutma
+
+
+
 
 // Egzersizi sil
 exports.deleteExercise = async (req, res) => {

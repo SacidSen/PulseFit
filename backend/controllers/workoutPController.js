@@ -1,15 +1,6 @@
 const Workout = require('../models/workoutP');
 
-// Tüm workout'ları getir
-exports.getAllWorkouts = async (req, res) => {
-  try {
-    const workouts = await Workout.find().populate('exercises');
-    res.status(200).json(workouts);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Workoutlar alınamadı' });
-  }
-};
+
 
 exports.createWorkout = async (req, res) => {
   try {
@@ -66,5 +57,43 @@ exports.updateWorkout = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Workout güncellenemedi' });
+  }
+};
+exports.saveWorkout = async (req, res) => {
+  try {
+    const { user, exercises, startTime, endTime } = req.body;
+
+    if (!user || !Array.isArray(exercises) || exercises.length === 0 || !startTime || !endTime) {
+      return res.status(400).json({ error: 'Eksik veya hatalı veri var' });
+    }
+
+    const workout = new Workout({
+      user,
+      exercises,
+      startTime,
+      endTime,
+    });
+
+    await workout.save();
+
+    res.status(201).json({ message: 'Workout kaydedildi', workout });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Kayıt başarısız' });
+  }
+};
+
+exports.getAllWorkouts = async (req, res) => {
+  try {
+    const { userId } = req.query;
+    let filter = {};
+    if (userId) {
+      filter.user = userId;
+    }
+    const workouts = await Workout.find(filter).populate('exercises');
+    res.status(200).json(workouts);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Workoutlar alınamadı' });
   }
 };
