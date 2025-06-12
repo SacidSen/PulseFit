@@ -1,31 +1,47 @@
 const mongoose = require('mongoose');
 
 const exerciseSchema = new mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'user',
-    required: true
-  },
   name: {
     type: String,
     required: true,
     trim: true
   },
-  sets: {
-    type: Number,
-    required: true,
-    min: 1
+  force: {
+    type: String,
+    enum: ['push', 'pull', 'static'],
+    required: true
   },
-  reps: {
-    type: Number,
-    required: true,
-    min: 1
+  level: {
+    type: String,
+    enum: ['beginner', 'intermediate', 'advanced'],
+    required: true
   },
-  weight: {
-    type: Number,
-    required: true,
-    min: 0
+  mechanic: {
+    type: String,
+    enum: ['compound', 'isolation'],
+    required: true
+  },
+  equipment: {
+    type: String,
+    required: true
+  },
+  primaryMuscles: {
+    type: [String],
+    required: true
+  },
+  secondaryMuscles: {
+    type: [String],
+    default: []
+  },
+  instructions: {
+    type: [String],
+    default: []
+  },
+  category: {
+    type: String,
+    enum: ['stretching', 'plyometrics', 'strongman', 'strength'],
+    required: true
   }
-}, { timestamps: false });
+});
 
 module.exports = mongoose.model('Exercise', exerciseSchema);

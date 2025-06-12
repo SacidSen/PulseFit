@@ -1,87 +1,252 @@
-import { useState } from 'react'
-import FullCalendar from '@fullcalendar/react'
-import dayGridPlugin from '@fullcalendar/daygrid' // a plugin!
-import interactionPlugin from "@fullcalendar/interaction" // needed for dayClick
-import { INITIAL_EVENTS, createEventId } from './event-utils'
-import timeGridPlugin from '@fullcalendar/timegrid'
+import { useState, useEffect } from 'react';
+import FullCalendar from '@fullcalendar/react';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import { createEventId } from './event-utils';
+import './tooltip.css';
 
-export default function Calender() {
-    const [weekendsVisible, setWeekendsVisible] = useState(true)
-    const [currentEvents, setCurrentEvents] = useState([])
-    let clickTimer : any = null;
+interface Exercise {
+  name: string;
+  sets: number;
+  reps: number;
+}
 
-    function renderEventContent(eventInfo : any) {
-        return (
-            <>
-            <b>{eventInfo.timeText}</b>
-            <i>{eventInfo.event.title}</i>
-            </>
-        )
-    }
+interface WorkoutPlan {
+  _id: string;
+  name: string;
+  trainingTime?: number;
+  exercises: Exercise[];
+  [key: string]: any;
+}
 
-    function handleEvents(events : any) {
-        console.log(events);
-        
-        setCurrentEvents(events)
-    }
+interface CalendarEvent {
+  id: string;
+  title: string;
+  start: Date;
+  end: Date;
+  allDay: boolean;
+}
 
-    function handleDateSelect(selectInfo : any) {
-        let title = prompt('Please enter a new title for your event')
-        let calendarApi = selectInfo.view.calendar
-        console.log('selectInfo', selectInfo);
-        
+export default function Calendar() {
+  const [weekendsVisible, setWeekendsVisible] = useState(true);
+  const [allWorkoutPlans, setAllWorkoutPlans] = useState<WorkoutPlan[]>([]);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [tooltipContent, setTooltipContent] = useState<string>('');
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [noWorkoutsMessage, setNoWorkoutsMessage] = useState(''); // <-- eklendi
 
-        calendarApi.unselect() // clear date selection
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const userId = user._id || user.id;
+    if (!userId) return;
 
-        if (title) {
-            calendarApi.addEvent({
-                id: createEventId(),
-                title,
-                start: selectInfo.startStr,
-                end: selectInfo.endStr,
-                allDay: selectInfo.allDay
-            })
+    fetch(`http://localhost:8000/api/workoutP/list?userId=${userId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setAllWorkoutPlans(data);
+          setNoWorkoutsMessage('');
+        } else {
+          setAllWorkoutPlans([]);
+          setNoWorkoutsMessage('Henüz workout oluşturulmadı.');
         }
-    }
+      })
+      .catch((err) => {
+        console.error(err);
+        setAllWorkoutPlans([]);
+        setNoWorkoutsMessage('Henüz workout oluşturulmadı.');
+      });
+  }, []);
 
-    function handleEventClick(clickInfo : any) {
-        if(clickTimer) {
-            const newTitle = prompt("Please edit the title for your event:", clickInfo.event.title);
-            clearTimeout(clickTimer);
-            clickTimer = null;
+  function renderEventContent(eventInfo: any) {
+    return (
+      <div
+        className="text-xl font-bold text-center w-full cursor-pointer uppercase"
+        onMouseEnter={(e) => handleTooltipOpen(e, eventInfo.event.title)}
+        onMouseMove={(e) => handleTooltipMove(e)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        {eventInfo.event.title}
+      </div>
+    );
+  }
 
-            if (newTitle) {
-            clickInfo.event.setProp("title", newTitle);
-            }
-        }else {
-            clickTimer = setTimeout(() => {
-                if (confirm(`Are you sure you want to delete the event '${clickInfo.event.title}'`)) {
-                  clickInfo.event.remove()
-                }
-            }, 250);
-        }
+  function handleTooltipOpen(e: any, title: string) {
+    const workout = allWorkoutPlans.find((w) => w.name === title);
+    if (workout) {
+      const content = `
+        <div>
+          <h1 style="font-weight:bold; margin-bottom: 4px;">${workout.name}</h1>
+          ${workout.exercises
+            .map(
+              (ex) =>
+                `<div style="margin-bottom:2px;">${ex.name} - ${ex.sets ?? "-"}x${ex.reps ?? "-"}</div>`
+            )
+            .join('')}
+        </div>
+      `;
+      setTooltipContent(content);
+      setShowTooltip(true);
     }
-    return(
-        <main className='max-h-fit grow mt-24'>
-            <FullCalendar
-            plugins={[ dayGridPlugin, interactionPlugin, timeGridPlugin ]}
-            headerToolbar={{
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay'
-            }}
-            initialView="dayGridMonth" // inital looks for month
-            select={handleDateSelect}
-            editable={true} // edit events
-            selectable={true} // dragging, clicking effect
-            selectMirror={false} // effect for dragging
-            dayMaxEvents={true} // show max event number (u can pass a number)
-            weekends={weekendsVisible} // toggle weekends
-            eventClick={handleEventClick} // delete event
-            eventsSet={handleEvents} // whenever changed something on calender, this func will called
-            initialEvents={INITIAL_EVENTS} // sets static data, for static data use 'events' props. 
-            eventContent={renderEventContent} // if u want to customise your Event
-            />
-        </main>
-    )
+  }
+
+  function handleTooltipMove(e: any) {
+    setTooltipPosition({ x: e.pageX + 10, y: e.pageY + 10 });
+  }
+
+  function handleEvents(eventsList: any) {
+    // FullCalendar'ın state güncellemesi gerekirse kullanılabilir
+  }
+
+ function handleDateSelect(selectInfo: any) {
+  if (allWorkoutPlans.length === 0) {
+    alert("Önce workout oluşturmalısınız!");
+    return;
+  }
+
+  const selectedName = prompt(
+    'Lütfen eklemek istediğiniz workout planın adını seçin:\n' +
+      allWorkoutPlans.map((w) => w.name).join('\n')
+  );
+
+  if (!selectedName) return alert('Seçim yapılmadı.');
+
+  const selectedWorkout = allWorkoutPlans.find((w) => w.name === selectedName);
+  if (!selectedWorkout) return alert('Workout bulunamadı');
+
+  const startDate = new Date(selectInfo.startStr);
+  const endDate = new Date(startDate);
+  endDate.setHours(startDate.getHours() + 1);
+
+  // Event objesi
+  const newEvent = {
+    id: createEventId(),
+    title: selectedWorkout.name,
+    start: startDate,
+    end: endDate,
+    allDay: false,
+  };
+
+  console.log("YENİ EVENT:", newEvent);
+
+
+  // --------------- BACKEND'E GÖNDER -----------------
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  fetch('http://localhost:8000/api/calendar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userId: user._id || user.id,
+      workoutId: selectedWorkout._id,
+      start: startDate,
+      end: endDate,
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    console.log("Takvim event'i kaydedildi:", data);
+    // İstersen event'e id'yi de data'dan alabilirsin
+    setEvents(prev => [
+    ...prev,
+    {
+      id: data._id,      // Buraya dikkat!
+      title: selectedWorkout.name,
+      start: startDate,
+      end: endDate,
+      allDay: false,
+    }
+  ]);
+  })
+  .catch(err => {
+    console.error("Takvim event'i kaydedilemedi:", err);
+  });
+  // --------------- BACKEND'E GÖNDER BİTTİ -----------------
+  setEvents(prev => [...prev, newEvent]);
+}
+
+
+
+  function handleEventClick(clickInfo: any) {
+  if (window.confirm(`Bu etkinliği silmek istediğinize emin misiniz? '${clickInfo.event.title}'`)) {
+    // 1. Backend'den sil
+    fetch(`http://localhost:8000/api/calendar/${clickInfo.event.id}`, {
+      method: 'DELETE'
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Veritabanından silinemedi');
+        // 2. Frontend'den sil
+        setEvents(prev => prev.filter(evt => evt.id !== clickInfo.event.id));
+        clickInfo.event.remove();
+      })
+      .catch(err => {
+        alert("Veritabanından silinirken hata oluştu!");
+        console.error(err);
+      });
+  }
+}
+
+
+  return (
+    <main className="w-full h-screen grow mt-24 relative">
+      {/* Workout plan isimlerini başlık altında göster veya mesajı göster */}
+      {noWorkoutsMessage ? (
+        <div className="mb-4 p-4 bg-white rounded shadow text-center text-gray-500">
+          {noWorkoutsMessage}
+        </div>
+      ) : allWorkoutPlans.length > 0 && (
+        <div className="mb-4 p-4 bg-white rounded shadow">
+          <p className="font-semibold mb-2">
+            Lütfen eklemek istediğiniz workout planın adını seçin:
+          </p>
+          <ul className="list-disc list-inside">
+            {allWorkoutPlans.map((w) => (
+              <li key={w._id}>{w.name}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <FullCalendar
+        plugins={[timeGridPlugin, interactionPlugin]}
+        headerToolbar={false}
+        initialView="timeGridWeek"
+        allDaySlot={false}
+        slotDuration="01:00:00"
+        height="100%"
+        expandRows={true}
+        slotMinTime="06:00:00"
+        slotMaxTime="24:00:00"
+        slotLabelFormat={{ hour: 'numeric', minute: '2-digit', hour12: false }}
+        dayHeaderFormat={{ weekday: 'long' }}
+        slotLabelClassNames="text-gray-400 text-lg"
+        dayCellClassNames="bg-white border border-gray-200"
+        select={handleDateSelect}
+        editable={false}
+        selectable={true}
+        selectMirror={false}
+        dayMaxEvents={true}
+        weekends={weekendsVisible}
+        eventClick={handleEventClick}
+        eventsSet={handleEvents}
+        events={events}
+        eventContent={renderEventContent}
+        eventClassNames="bg-blue-500 bg-opacity-60 text-white border border-blue-400"
+      />
+
+      {showTooltip && (
+        <div
+          className="tooltip"
+          style={{
+            position: 'absolute',
+            top: tooltipPosition.y,
+            left: tooltipPosition.x,
+            pointerEvents: 'none',
+            zIndex: 1000,
+          }}
+          dangerouslySetInnerHTML={{ __html: tooltipContent }}
+        />
+      )}
+    </main>
+  );
 }

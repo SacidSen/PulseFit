@@ -4,8 +4,8 @@ import useSignIn from "react-auth-kit/hooks/useSignIn";
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("faco@gmail.com");
+  const [password, setPassword] = useState("Stron1!");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const signIn = useSignIn();
@@ -19,10 +19,20 @@ export default function Login() {
     try {
       const response = await axios.post(
         "http://localhost:8000/api/users/login",
+        
         { email, password }
       );
-  
+      console.log("BACKEND'DEN GELEN CEVAP:", response.data);
       setSuccess("Login successful! Redirecting...");
+
+      console.log(response);
+      
+
+     localStorage.setItem("user", JSON.stringify({
+        id: response.data.user.id,
+        email: response.data.user.email,
+        token: response.data.token
+      }));
   
       signIn({
         auth: {

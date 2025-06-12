@@ -18,6 +18,7 @@ app.use(express.json());          // JSON body parser
 app.use(cookieParser());         // Cookie parser middleware
 
 // --- ROUTES ---
+const calendarRoutes = require('./routes/calendarRoutes');
 const userRoutes = require('./routes/userRoutes');
 const workoutPRoutes = require('./routes/workoutPRoutes');
 const exerciseRoutes = require('./routes/exerciseRoutes');
@@ -31,6 +32,7 @@ app.get('/', (req, res) => {
 app.use('/api/users', userRoutes);
 app.use('/api/workoutP', workoutPRoutes);
 app.use('/api/exercise', exerciseRoutes);
+app.use('/api/calendar', calendarRoutes);
 
 // --- HATA YAKALAMA ---
 app.use(errorHandler);

@@ -1,12 +1,35 @@
-export default function WorkoutCard() {
-    // , consistency, ambition, gender, image
-    return(
+import dayjs from 'dayjs';
+import { useMemo } from 'react';
+
+interface WorkoutCardProps {
+    workoutName: string;
+    startDate: string;
+    endDate: string;
+    startTime: string;
+    endTime: string;
+    exercises: any[];
+    onDelete: () => void;
+    onEdit?: () => void;
+}
+
+export default function WorkoutCard({ workoutName, startDate, endDate, onDelete }: WorkoutCardProps) {
+    const start = dayjs(startDate);
+    const end = dayjs(endDate);
+    const durationWeeks = Math.ceil(end.diff(start, 'day') / 7);
+    
+
+    const randomImage = useMemo(() => {
+        const imageIndex = Math.floor(Math.random() * 3) + 1;
+        return `/Workout_Image-${imageIndex}.png`;
+    }, []);
+
+    return (
         <div className="h-fit min-w-1/4 w-1/4 px-4 mb-10">
             <div className="border rounded-md border-gray-400 h-full flex items-center flex-col">
-                <img className="rounded-tr-md rounded-tl-md" src="Workout_Image-1.png" alt="Workout_Image" />
+                <img className="rounded-tr-md rounded-tl-md" src={randomImage} alt="Workout_Image" />
                 <div className="flex grow flex-col justify-center items-center px-2">
                     <h1 className="font-semibold uppercase mt-2 text-center">
-                        Your workout plan
+                        {workoutName}
                     </h1>
                     <h2 className="text-red-600 mb-2">Workout Plan</h2>
                     <div className="flex items-center flex-wrap justify-center">
@@ -31,7 +54,7 @@ export default function WorkoutCard() {
                             <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0"/>
                             </svg>
                             {/* <p>{consistency}</p> */}
-                            <p className="font-semibold text-sm ml-1">4 Weeks</p>
+                            <p className="font-semibold text-sm ml-1">{durationWeeks} week{durationWeeks > 1 ? 's' : ''}</p>
                         </div>
                     </div>
                     <div className="flex w-full justify-end my-4">
@@ -41,7 +64,9 @@ export default function WorkoutCard() {
                             <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
                             </svg>
                         </button>
-                        <button className="bg-red-600 px-1 py-2 rounded cursor-pointer">
+                        <button 
+                            onClick={onDelete}
+                            className="bg-red-600 px-1 py-2 rounded cursor-pointer">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="text-white" viewBox="0 0 16 16">
                             <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
                             </svg>
