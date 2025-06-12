@@ -12,6 +12,7 @@
     "@fullcalendar/react": "^6.1.17",
     "@tailwindcss/vite": "^4.1.7",
     "axios": "^1.9.0",
+    "dayjs": "^1.11.13",
     "fullcalendar": "^6.1.17",
     "react": "^19.1.0",
     "react-auth-kit": "^3.1.3",

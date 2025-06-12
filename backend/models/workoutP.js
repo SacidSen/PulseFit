@@ -7,6 +7,10 @@ const workoutSchema = new mongoose.Schema({
     ref: 'user',
     required: true
   },
+  name: {
+    type: String,
+    required: true
+  },
   exercises: {
     type: [{
       type: mongoose.Schema.Types.ObjectId,
@@ -19,10 +23,21 @@ const workoutSchema = new mongoose.Schema({
       message: 'Bir workout en az 1 ve en fazla 10 egzersiz içermelidir.'
     }
   },
-  name: {
-    type: String,
+  startDate: {
+    type: Date,
     required: true
+  },
+  endDate: {
+    type: Date,
+    required: true,
+    validate: {
+      validator: function (value) {
+        return !this.startDate || value >= this.startDate;
+      },
+      message: 'Bitiş tarihi başlangıç tarihinden önce olamaz.'
+    }
   }
 });
 
-module.exports = mongoose.model('Workout', workoutSchema);
+
+module.exports = mongoose.model('workoutPlan', workoutSchema);
