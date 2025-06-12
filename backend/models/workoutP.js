@@ -10,7 +10,7 @@ const workoutSchema = new mongoose.Schema({
   exercises: {
     type: [{
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'exercise'
+      ref: 'Exercise'
     }],
     validate: {
       validator: function (arr) {

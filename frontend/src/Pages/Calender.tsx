@@ -147,22 +147,45 @@ export default function Calendar() {
   .then(data => {
     console.log("Takvim event'i kaydedildi:", data);
     // İstersen event'e id'yi de data'dan alabilirsin
+    setEvents(prev => [
+    ...prev,
+    {
+      id: data._id,      // Buraya dikkat!
+      title: selectedWorkout.name,
+      start: startDate,
+      end: endDate,
+      allDay: false,
+    }
+  ]);
   })
   .catch(err => {
     console.error("Takvim event'i kaydedilemedi:", err);
   });
   // --------------- BACKEND'E GÖNDER BİTTİ -----------------
-
-  setEvents((prev) => [...prev, newEvent]);
+  setEvents(prev => [...prev, newEvent]);
 }
 
 
+
   function handleEventClick(clickInfo: any) {
-    if (confirm(`Bu etkinliği silmek istediğinize emin misiniz? '${clickInfo.event.title}'`)) {
-      setEvents((prev) => prev.filter((evt) => evt.id !== clickInfo.event.id));
-      clickInfo.event.remove();
-    }
+  if (window.confirm(`Bu etkinliği silmek istediğinize emin misiniz? '${clickInfo.event.title}'`)) {
+    // 1. Backend'den sil
+    fetch(`http://localhost:8000/api/calendar/${clickInfo.event.id}`, {
+      method: 'DELETE'
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Veritabanından silinemedi');
+        // 2. Frontend'den sil
+        setEvents(prev => prev.filter(evt => evt.id !== clickInfo.event.id));
+        clickInfo.event.remove();
+      })
+      .catch(err => {
+        alert("Veritabanından silinirken hata oluştu!");
+        console.error(err);
+      });
   }
+}
+
 
   return (
     <main className="w-full h-screen grow mt-24 relative">
