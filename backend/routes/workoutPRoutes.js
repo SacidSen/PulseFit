@@ -7,6 +7,9 @@ const { getAllWorkouts, createWorkout,deleteWorkout,updateWorkout,saveWorkout} =
 // GET: Tüm workout'ları getir
 router.get('/list', getAllWorkouts);
 
+// GET: Benim workout'ları getir
+router.get('/:userId', getAllWorkouts);
+
 // POST: Yeni workout oluştur
 router.post('/:id', createWorkout);
 

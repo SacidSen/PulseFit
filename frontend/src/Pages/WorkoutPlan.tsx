@@ -3,6 +3,7 @@ import WorkoutCard from "../Components/Plan/WorkoutCard";
 import Pagination from "../Components/Pagination";
 import ExerciseCard from "../Components/Plan/ExerciseCard";
 import axios from "axios";
+
 interface Exercise {
     _id: string;
     name: string;
@@ -18,6 +19,7 @@ interface Workout {
     exercises: Exercise[];
     onDelete: (id: string) => void;
 }
+
 interface User {
     id: string;
     email: string;
@@ -35,18 +37,24 @@ export default function ExercisePage() {
     const [isEditingTitle, setIsEditingTitle] = useState(false);
     const [workoutName, setWorkoutName] = useState("Your Workout Plan");
     const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("<<lö");
+    const [endDate, setEndDate] = useState("");
     const modalRef = useRef<HTMLDivElement>(null);
     const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
-    const filteredExercises = exercises.filter((ex) => ex.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    const filteredExercises = exercises.filter((ex) =>
+        ex.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
     const lastPostIndex = currentPage * postsPerPage;
     const firstPostIndex = lastPostIndex - postsPerPage;
     const currentExercise = filteredExercises.slice(firstPostIndex, lastPostIndex);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingWorkoutId, setEditingWorkoutId] = useState<string | null>(null);
+
     const handleExerciseChange = (id: string) => {
         setSelectedExercises((prev) =>
             prev.includes(id) ? prev.filter((eid) => eid !== id) : [...prev, id]
         );
     };
+
     const handleDeleteWorkout = async (id: string) => {
         try {
             await axios.delete(`http://localhost:8000/api/workoutP/${id}`);
@@ -54,6 +62,16 @@ export default function ExercisePage() {
         } catch (error) {
             console.error("Workout deletion failed:", error);
         }
+    };
+
+    const handleEditWorkout = (workout: Workout) => {
+        setWorkoutName(workout.name);
+        setStartDate(workout.startDate);
+        setEndDate(workout.endDate);
+        setSelectedExercises(workout.exercises.map((ex) => ex._id));
+        setEditingWorkoutId(workout._id);
+        setIsEditing(true);
+        setShowExercise(true);
     };
 
     useEffect(() => {
@@ -75,14 +93,12 @@ export default function ExercisePage() {
         }
     }, []);
 
-    // Fetch workouts
     useEffect(() => {
         if (user) {
-            axios.get(`http://localhost:8000/api/workoutP/${user.id}`)
+            axios
+                .get(`http://localhost:8000/api/workoutP/${user.id}`)
                 .then((res) => setWorkouts(res.data))
                 .catch((err) => console.error("Workout fetch error:", err));
-                console.log(user);
-                
         }
     }, [user]);
 
@@ -90,8 +106,11 @@ export default function ExercisePage() {
         function handleClickOutside(event: MouseEvent) {
             if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
                 setShowExercise(false);
+                setEditingWorkoutId(null);
+                setIsEditing(false);
             }
         }
+
         if (showExercise) {
             document.addEventListener("mousedown", handleClickOutside);
         }
@@ -101,28 +120,53 @@ export default function ExercisePage() {
     async function createWorkout(e: React.FormEvent) {
         e.preventDefault();
         if (!user) return;
-    
+
         const formData = {
             user: user.id,
             name: workoutName,
-            exercises: selectedExercises, // <- use real selected exercises
+            exercises: selectedExercises,
             startDate,
             endDate,
             startTime: "08:00",
             endTime: "09:00",
         };
-    
+
         try {
-            await axios.post(`http://localhost:8000/api/workoutP/${user.id}`, formData);
-            const res = await axios.get(`http://localhost:8000/api/workoutP/${user.id}`);
-            setWorkouts(res.data);
+            if (editingWorkoutId) {
+                await axios.put(`http://localhost:8000/api/workoutP/${editingWorkoutId}`, formData);
+
+                const updated = workouts.map((w) =>
+                    w._id === editingWorkoutId
+                        ? {
+                              ...w,
+                              name: workoutName,
+                              startDate,
+                              endDate,
+                              startTime: "08:00",
+                              endTime: "09:00",
+                              exercises: exercises.filter((ex) =>
+                                  selectedExercises.includes(ex._id)
+                              ),
+                          }
+                        : w
+                );
+                setWorkouts(updated);
+            } else {
+                await axios.post(`http://localhost:8000/api/workoutP/${user.id}`, formData);
+                const res = await axios.get(`http://localhost:8000/api/workoutP/${user.id}`);
+                setWorkouts(res.data);
+            }
+
+            // Reset state
             setShowExercise(false);
-            setSelectedExercises([]); 
+            setSelectedExercises([]);
             setWorkoutName("Your Workout Plan");
-            setStartDate(""); 
-            setEndDate("");  
-        } catch (error) {
-            console.error("Workout creation error:", error);
+            setStartDate("");
+            setEndDate("");
+            setEditingWorkoutId(null);
+            setIsEditing(false);
+        } catch (error: any) {
+            console.error("Workout save error:", error?.response?.data || error.message);
         }
     }
 
@@ -144,7 +188,15 @@ export default function ExercisePage() {
                         className="bg-green-600 mr-2 cursor-pointer flex hover:opacity-75 px-3 py-1 rounded font-semibold text-white text-sm"
                     >
                         <p className="mr-2">Add Workout Plan</p>
-                        <svg viewBox="0 0 24 24" width="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                        <svg
+                            viewBox="0 0 24 24"
+                            width="20"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            fill="none"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                         </svg>
@@ -162,7 +214,8 @@ export default function ExercisePage() {
                             endTime={workout.endTime}
                             exercises={workout.exercises}
                             onDelete={() => handleDeleteWorkout(workout._id)}
-                            />
+                            onEdit={() => handleEditWorkout(workout)}
+                        />
                     ))}
                 </section>
 
@@ -177,7 +230,9 @@ export default function ExercisePage() {
                                         value={workoutName}
                                         onChange={(e) => setWorkoutName(e.target.value)}
                                         onBlur={() => setIsEditingTitle(false)}
-                                        onKeyDown={(e) => e.key === "Enter" && setIsEditingTitle(false)}
+                                        onKeyDown={(e) =>
+                                            e.key === "Enter" && setIsEditingTitle(false)
+                                        }
                                     />
                                 ) : (
                                     <h1

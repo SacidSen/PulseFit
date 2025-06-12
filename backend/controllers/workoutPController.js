@@ -85,11 +85,13 @@ exports.saveWorkout = async (req, res) => {
 
 exports.getAllWorkouts = async (req, res) => {
   try {
-    const { userId } = req.query;
-    let filter = {};
+    const userId = req.params.userId;
+
+    const filter = {};
     if (userId) {
       filter.user = userId;
     }
+
     const workouts = await Workout.find(filter).populate('exercises');
     res.status(200).json(workouts);
   } catch (error) {

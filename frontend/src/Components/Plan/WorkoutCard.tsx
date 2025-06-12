@@ -9,6 +9,7 @@ interface WorkoutCardProps {
     endTime: string;
     exercises: any[];
     onDelete: () => void;
+    onEdit?: () => void;
 }
 
 export default function WorkoutCard({ workoutName, startDate, endDate, onDelete }: WorkoutCardProps) {
