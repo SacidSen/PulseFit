@@ -48,9 +48,11 @@ export default function Execsises() {
                 {/* exercise card */}
                 {exercises.length > 0 &&
                     exercises.map((item, index ) => {
-                        const { name, images, instructions, level } = item;
+                        const { _id, name, images, instructions, level } = item;
                         return (
-                            <ExerciseOverviewCard key={index}
+                            <ExerciseOverviewCard 
+                                key={_id}
+                                _id={_id}
                                 name={name}
                                 images={images}
                                 instructions={instructions}
