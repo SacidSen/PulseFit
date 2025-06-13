@@ -8,7 +8,7 @@ const calendarEventSchema = new mongoose.Schema({
   },
   workoutId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'workoutP',
+    ref: 'workoutPlan',
     required: true,
   },
   start: {

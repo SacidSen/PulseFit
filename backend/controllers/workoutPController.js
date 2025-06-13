@@ -3,6 +3,7 @@ const Workout = require('../models/workoutP');
 
 
 exports.createWorkout = async (req, res) => {
+  console.log("Gelen veri:", req.body);
   try {
     const userId = req.params.id;  // URL parametresinden user id alınır
     if (!userId) {
