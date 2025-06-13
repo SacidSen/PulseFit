@@ -12,7 +12,7 @@ import WorkoutPlan from './Pages/WorkoutPlan.tsx'
 import AuthProvider from 'react-auth-kit'
 import createStore from 'react-auth-kit/createStore'
 import ProtectedRoute from './Components/ProtectedRoute' // import your new component
-import Exercise from './Pages/Exercise.tsx';
+import Exercises from './Pages/Exercises.tsx';
 
 export const store = createStore({
   authName: '_auth',
@@ -58,7 +58,7 @@ const router = createBrowserRouter([
         path: '/exercises',
         element: (
           <ProtectedRoute>
-            <Exercise />
+            <Exercises />
           </ProtectedRoute>
         ),
       },

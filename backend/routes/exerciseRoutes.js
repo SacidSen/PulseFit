@@ -3,7 +3,7 @@ const router = express.Router();
 const exerciseController = require('../controllers/exerciseController');
 
 // Tüm egzersizleri getir
-router.get('/', exerciseController.getAllExercises);
+router.get('/:id', exerciseController.getAllExercises);
 
 // Yeni egzersiz oluştur
 router.post('/', exerciseController.createExercise);

@@ -49,7 +49,7 @@ exports.updateWorkout = async (req, res) => {
   try {
     const updatedWorkout = await Workout.findByIdAndUpdate(
       workoutId,
-      { exercises: req.body.exercises },
+      req.body,
       { new: true, runValidators: true }
     );
 

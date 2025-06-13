@@ -183,7 +183,7 @@ export default function Calendar() {
   }
 
   return (
-    <main className="w-full h-screen grow mt-24 relative">
+    <main className="w-full grow mt-24 relative">
       {/* Workout plan isimlerini başlık altında göster veya mesajı göster */}
       {noWorkoutsMessage ? (
         <div className="mb-4 p-4 bg-white rounded shadow text-center text-gray-500">
@@ -202,6 +202,7 @@ export default function Calendar() {
         </div>
       )}
 
+      <div className='h-[700px]'>
       <FullCalendar
         plugins={[timeGridPlugin, interactionPlugin]}
         headerToolbar={false}
@@ -228,6 +229,7 @@ export default function Calendar() {
         eventContent={renderEventContent}
         eventClassNames="bg-blue-500 bg-opacity-60 text-white border border-blue-400"
       />
+      </div>
 
       {showTooltip && (
         <div
