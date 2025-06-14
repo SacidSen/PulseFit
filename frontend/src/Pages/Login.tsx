@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [email, setEmail] = useState("faco@gmail.com");
-  const [password, setPassword] = useState("Stron1!");
+  const [password, setPassword] = useState("StrongPass1!");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const signIn = useSignIn();

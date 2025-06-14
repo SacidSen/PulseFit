@@ -7,8 +7,11 @@ export interface Exercise {
     name: string;
     images: string[];
     instructions : string[];
+    sets : number;
+    reps : number;
     level : string
 }
+
 interface User {
     id: string;
     email: string;
@@ -47,8 +50,8 @@ export default function Execsises() {
             <section className="mx-auto max-w-6xl mt-12 flex flex-wrap">
                 {/* exercise card */}
                 {exercises.length > 0 &&
-                    exercises.map((item, index ) => {
-                        const { _id, name, images, instructions, level } = item;
+                    exercises.map((item) => {
+                        const { _id, name, images, instructions, level, sets, reps } = item;
                         return (
                             <ExerciseOverviewCard 
                                 key={_id}
@@ -57,6 +60,8 @@ export default function Execsises() {
                                 images={images}
                                 instructions={instructions}
                                 level={level}
+                                sets={sets}
+                                reps={reps}
                             />
                         )
                     })

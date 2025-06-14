@@ -22,20 +22,6 @@ const workoutSchema = new mongoose.Schema({
       },
       message: 'Max 10 egzersiz eklenebilir.'
     }
-  },
-  startDate: {
-    type: Date,
-    required: false
-  },
-  endDate: {
-    type: Date,
-    required: true,
-    validate: {
-      validator: function (value) {
-        return !this.startDate || value >= this.startDate;
-      },
-      message: 'Bitiş tarihi başlangıç tarihinden önce olamaz.'
-    }
   }
 });
 
