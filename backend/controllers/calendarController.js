@@ -1,16 +1,15 @@
 const CalendarEvent = require('../models/Calendar');
 
+
 // Kullanıcının tüm calendar eventlerini getir
 exports.getUserCalendarEvents = async (req, res) => {
   try {
     const { userId, workoutId } = req.query;
-
-    // Hangi parametreyi zorunlu tutmak istiyorsan kontrol et
     if (!userId && !workoutId) {
       return res.status(400).json({ message: 'userId veya workoutId gerekli' });
     }
 
-    // Dinamik filtre oluştur
+    // Doğrudan stringle eşle
     const filter = {};
     if (userId) filter.userId = userId;
     if (workoutId) filter.workoutId = workoutId;
@@ -18,10 +17,14 @@ exports.getUserCalendarEvents = async (req, res) => {
     const events = await CalendarEvent.find(filter).populate('workoutId');
     res.status(200).json(events);
   } catch (error) {
-    console.error(error);
+    console.error('HATA:', error);
     res.status(500).json({ message: 'Eventler alınamadı' });
   }
 };
+
+
+
+
 exports.createCalendarEvent = async (req, res) => {
   try {
     const { userId, workoutId, start, end } = req.body;

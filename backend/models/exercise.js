@@ -6,6 +6,14 @@ const exerciseSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  reps: {
+    type: Number,
+    required: true
+  },
+  sets: {
+    type: Number,
+    required: true
+  },
   force: {
     type: String,
     enum: ['push', 'pull', 'static'],

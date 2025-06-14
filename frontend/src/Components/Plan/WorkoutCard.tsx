@@ -9,15 +9,13 @@ interface WorkoutCardProps {
     endTime: string;
     exercises: any[];
     onDelete: () => void;
-    onEdit?: () => void;
+    onEdit: () => void;
 }
 
-export default function WorkoutCard({ workoutName, startDate, endDate, onDelete }: WorkoutCardProps) {
+export default function WorkoutCard({ workoutName, startDate, endDate, onDelete, onEdit }: WorkoutCardProps) {
     const start = dayjs(startDate);
     const end = dayjs(endDate);
     const durationWeeks = Math.ceil(end.diff(start, 'day') / 7);
-    
-
     const randomImage = useMemo(() => {
         const imageIndex = Math.floor(Math.random() * 3) + 1;
         return `/Workout_Image-${imageIndex}.png`;
@@ -58,13 +56,14 @@ export default function WorkoutCard({ workoutName, startDate, endDate, onDelete 
                         </div>
                     </div>
                     <div className="flex w-full justify-end my-4">
-                        <button className="bg-blue-600 px-1 py-2 rounded cursor-pointer mr-1">
+                        <button type='button' onClick={onEdit} className="bg-blue-600 px-1 py-2 rounded cursor-pointer mr-1">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="text-white" viewBox="0 0 16 16">
                             <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                            <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+                            <path fillRule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
                             </svg>
                         </button>
                         <button 
+                            type='button'
                             onClick={onDelete}
                             className="bg-red-600 px-1 py-2 rounded cursor-pointer">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="text-white" viewBox="0 0 16 16">

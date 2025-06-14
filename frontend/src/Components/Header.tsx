@@ -31,6 +31,7 @@ export default function Header() {
             <>
               <Link className="hover:text-green-600" to="/calender">Calender</Link>
               <Link className="hover:text-green-600" to="/workoutPlan">Workout Plans</Link>
+              <Link className="hover:text-green-600" to="/exercises">Exercises</Link>
               <button
                 onClick={handleLogout}
                 className="hover:opacity-60 uppercase bg-red-600 text-white px-2 py-0.5 rounded text-sm cursor-pointer"

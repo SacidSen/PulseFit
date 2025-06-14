@@ -57,6 +57,20 @@ export default function Calendar() {
         setAllWorkoutPlans([]);
         setNoWorkoutsMessage('Henüz workout oluşturulmadı.');
       });
+    // Takvim etkinliklerini yükle
+  fetch(`http://localhost:8000/api/calendar?userId=${userId}`)
+    .then(res => res.json())
+    .then(eventsFromBackend => {
+      console.log(">>> Backend'den gelen takvim eventleri:", eventsFromBackend);
+      const eventsForCalendar = eventsFromBackend.map((e: any) => ({
+        id: e._id,
+        title: e.workoutId?.name || "Workout",
+        start: new Date(e.start),
+        end: new Date(e.end),
+        allDay: false,
+      }));
+      setEvents(eventsForCalendar);
+    });
   }, []);
 
   function renderEventContent(eventInfo: any) {
@@ -99,96 +113,77 @@ export default function Calendar() {
     // FullCalendar'ın state güncellemesi gerekirse kullanılabilir
   }
 
- function handleDateSelect(selectInfo: any) {
-  if (allWorkoutPlans.length === 0) {
-    alert("Önce workout oluşturmalısınız!");
-    return;
-  }
-
-  const selectedName = prompt(
-    'Lütfen eklemek istediğiniz workout planın adını seçin:\n' +
-      allWorkoutPlans.map((w) => w.name).join('\n')
-  );
-
-  if (!selectedName) return alert('Seçim yapılmadı.');
-
-  const selectedWorkout = allWorkoutPlans.find((w) => w.name === selectedName);
-  if (!selectedWorkout) return alert('Workout bulunamadı');
-
-  const startDate = new Date(selectInfo.startStr);
-  const endDate = new Date(startDate);
-  endDate.setHours(startDate.getHours() + 1);
-
-  // Event objesi
-  const newEvent = {
-    id: createEventId(),
-    title: selectedWorkout.name,
-    start: startDate,
-    end: endDate,
-    allDay: false,
-  };
-
-  console.log("YENİ EVENT:", newEvent);
-
-
-  // --------------- BACKEND'E GÖNDER -----------------
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
-  fetch('http://localhost:8000/api/calendar', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      userId: user._id || user.id,
-      workoutId: selectedWorkout._id,
-      start: startDate,
-      end: endDate,
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    console.log("Takvim event'i kaydedildi:", data);
-    // İstersen event'e id'yi de data'dan alabilirsin
-    setEvents(prev => [
-    ...prev,
-    {
-      id: data._id,      // Buraya dikkat!
-      title: selectedWorkout.name,
-      start: startDate,
-      end: endDate,
-      allDay: false,
+  function handleDateSelect(selectInfo: any) {
+    if (allWorkoutPlans.length === 0) {
+      alert("Önce workout oluşturmalısınız!");
+      return;
     }
-  ]);
-  })
-  .catch(err => {
-    console.error("Takvim event'i kaydedilemedi:", err);
-  });
-  // --------------- BACKEND'E GÖNDER BİTTİ -----------------
-  setEvents(prev => [...prev, newEvent]);
-}
 
+    const selectedName = prompt(
+      'Lütfen eklemek istediğiniz workout planın adını seçin:\n' +
+        allWorkoutPlans.map((w) => w.name).join('\n')
+    );
 
+    if (!selectedName) return alert('Seçim yapılmadı.');
 
-  function handleEventClick(clickInfo: any) {
-  if (window.confirm(`Bu etkinliği silmek istediğinize emin misiniz? '${clickInfo.event.title}'`)) {
-    // 1. Backend'den sil
-    fetch(`http://localhost:8000/api/calendar/${clickInfo.event.id}`, {
-      method: 'DELETE'
+    const selectedWorkout = allWorkoutPlans.find((w) => w.name === selectedName);
+    if (!selectedWorkout) return alert('Workout bulunamadı');
+
+    const startDate = new Date(selectInfo.startStr);
+    const endDate = new Date(startDate);
+    endDate.setHours(startDate.getHours() + 1);
+
+    // --------------- BACKEND'E GÖNDER -----------------
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    fetch('http://localhost:8000/api/calendar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: user._id || user.id,
+        workoutId: selectedWorkout._id,
+        start: startDate,
+        end: endDate,
+      })
     })
-      .then(res => {
-        if (!res.ok) throw new Error('Veritabanından silinemedi');
-        // 2. Frontend'den sil
-        setEvents(prev => prev.filter(evt => evt.id !== clickInfo.event.id));
-        clickInfo.event.remove();
+      .then(res => res.json())
+      .then(data => {
+        console.log("Takvim event'i kaydedildi:", data);
+        setEvents(prev => [
+          ...prev,
+          {
+            id: data._id,  // Sadece backend'den gelen gerçek id
+            title: selectedWorkout.name,
+            start: startDate,
+            end: endDate,
+            allDay: false,
+          }
+        ]);
       })
       .catch(err => {
-        alert("Veritabanından silinirken hata oluştu!");
-        console.error(err);
+        console.error("Takvim event'i kaydedilemedi:", err);
       });
+    // --------------- BACKEND'E GÖNDER BİTTİ -----------------
   }
-}
 
+  function handleEventClick(clickInfo: any) {
+    if (window.confirm(`Bu etkinliği silmek istediğinize emin misiniz? '${clickInfo.event.title}'`)) {
+      fetch(`http://localhost:8000/api/calendar/${clickInfo.event.id}`, {
+        method: 'DELETE'
+      })
+        .then(res => {
+          if (!res.ok) throw new Error('Veritabanından silinemedi');
+          setEvents(prev => prev.filter(evt => evt.id !== clickInfo.event.id));
+          clickInfo.event.remove();
+        })
+        .catch(err => {
+          alert("Veritabanından silinirken hata oluştu!");
+          console.error(err);
+        });
+    }
+  }
 
   return (
-    <main className="w-full h-screen grow mt-24 relative">
+    <main className="w-full grow mt-24 relative">
       {/* Workout plan isimlerini başlık altında göster veya mesajı göster */}
       {noWorkoutsMessage ? (
         <div className="mb-4 p-4 bg-white rounded shadow text-center text-gray-500">
@@ -207,6 +202,7 @@ export default function Calendar() {
         </div>
       )}
 
+      <div className='h-[700px]'>
       <FullCalendar
         plugins={[timeGridPlugin, interactionPlugin]}
         headerToolbar={false}
@@ -233,6 +229,7 @@ export default function Calendar() {
         eventContent={renderEventContent}
         eventClassNames="bg-blue-500 bg-opacity-60 text-white border border-blue-400"
       />
+      </div>
 
       {showTooltip && (
         <div

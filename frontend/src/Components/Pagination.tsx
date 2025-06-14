@@ -36,6 +36,7 @@ type PaginationProps = {
       <div className="w-full flex justify-center mt-4 gap-2 flex-wrap">
         {/* Prev button */}
         <button
+          type="button"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
           className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50 cursor-pointer"
@@ -46,6 +47,7 @@ type PaginationProps = {
         {/* Page buttons */}
         {visiblePages.map((page) => (
           <button
+            type="button"
             key={page}
             onClick={() => setCurrentPage(page)}
             className={`px-4 py-2 rounded ${
@@ -58,6 +60,7 @@ type PaginationProps = {
   
         {/* Next button */}
         <button
+          type="button"
           onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
           disabled={currentPage === totalPages}
           className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50 cursor-pointer"

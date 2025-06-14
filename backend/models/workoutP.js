@@ -18,14 +18,14 @@ const workoutSchema = new mongoose.Schema({
     }],
     validate: {
       validator: function (arr) {
-        return arr.length >= 1 && arr.length <= 10;
+        return arr.length <= 10;
       },
-      message: 'Bir workout en az 1 ve en fazla 10 egzersiz içermelidir.'
+      message: 'Max 10 egzersiz eklenebilir.'
     }
   },
   startDate: {
     type: Date,
-    required: true
+    required: false
   },
   endDate: {
     type: Date,

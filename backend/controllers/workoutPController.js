@@ -1,8 +1,8 @@
 const Workout = require('../models/workoutP');
-
-
+const CalendarEvent = require('../models/Calendar'); // CalendarEvent modelini import et
 
 exports.createWorkout = async (req, res) => {
+  console.log("Gelen veri:", req.body);
   try {
     const userId = req.params.id;  // URL parametresinden user id alınır
     if (!userId) {
@@ -33,19 +33,23 @@ exports.deleteWorkout = async (req, res) => {
       return res.status(404).json({ message: 'Workout bulunamadı' });
     }
 
-    res.status(200).json({ message: 'Workout silindi' });
+    // Workout silindiyse, ilgili tüm calendar kayıtlarını da sil
+    await CalendarEvent.deleteMany({ workoutId: req.params.id });
+
+    res.status(200).json({ message: 'Workout ve ilgili calendar eventler silindi' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Workout silinemedi' });
   }
 };
+
 exports.updateWorkout = async (req, res) => {
   const workoutId = req.params.id;
 
   try {
     const updatedWorkout = await Workout.findByIdAndUpdate(
       workoutId,
-      { exercises: req.body.exercises },
+      req.body,
       { new: true, runValidators: true }
     );
 
@@ -59,6 +63,7 @@ exports.updateWorkout = async (req, res) => {
     res.status(500).json({ message: 'Workout güncellenemedi' });
   }
 };
+
 exports.saveWorkout = async (req, res) => {
   try {
     const { user, exercises, startTime, endTime } = req.body;
