@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 
 interface WorkoutCardProps {
@@ -9,12 +9,6 @@ interface WorkoutCardProps {
     sets: number;
     reps: number;
     level: string;
-}
-
-interface User {
-    id: string;
-    email: string;
-    token: string;
 }
 
 export default function ExerciseOverviewCard({
@@ -31,15 +25,6 @@ export default function ExerciseOverviewCard({
     const [reps, setReps] = useState(initialReps);
     const [tempSets, setTempSets] = useState((initialSets ?? 0).toString());
     const [tempReps, setTempReps] = useState((initialReps ?? 0).toString());
-    const [user, setUser] = useState<User | null>(null);
-
-    useEffect(() => {
-        const user = localStorage.getItem("user");
-
-        if (user) {
-            setUser(JSON.parse(user));
-        }
-    }, [])
 
     const handleSave = async () => {
         setIsEditing(false);
