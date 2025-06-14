@@ -2,6 +2,7 @@ const User = require('../models/user');
 const getCurrentUser = require('../service/user');
 const jwt = require('jsonwebtoken');
 
+// Token generieren
 const generateToken = async (user, statusCode, res) => {
   const token = await user.jwtGenerateToken();
 
@@ -24,69 +25,72 @@ const generateToken = async (user, statusCode, res) => {
     });
 };
 
+// Benutzer registrieren
 const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: 'Email ve password zorunlu' });
+      return res.status(400).json({ message: 'E-Mail und Passwort sind erforderlich' });
     }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: 'Bu email zaten kayıtlı' });
+      return res.status(400).json({ message: 'Diese E-Mail ist bereits registriert' });
     }
 
     const newUser = new User({ name: name || '', email, password });
     await newUser.save();
 
-    res.status(201).json({ message: 'Kullanıcı başarıyla oluşturuldu' });
+    res.status(201).json({ message: 'Benutzer erfolgreich erstellt' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Sunucu hatası' });
+    res.status(500).json({ error: 'Serverfehler' });
   }
 };
 
+// Benutzer einloggen
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: 'Kullanıcı bulunamadı' });
+      return res.status(404).json({ message: 'Benutzer nicht gefunden' });
     }
 
-    if (user.password !== password) {
-      return res.status(401).json({ message: 'Şifre yanlış' });
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Falsches Passwort' });
     }
 
     await generateToken(user, 200, res);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Sunucu hatası' });
+    res.status(500).json({ error: 'Serverfehler' });
   }
 };
-const logoutUser = async(req,res) => {  
+
+// Benutzer ausloggen
+const logoutUser = async (req, res) => {  
   res.clearCookie('');
   res.status(200).json({
     success: true,
-    message: 'Başarıyla çıkış yapıldı'
+    message: 'Erfolgreich abgemeldet'
   });
-  
 };
 
-
+// Aktuellen Benutzer abrufen
 const getMe = async (req, res) => {
   try {
     const token = req.cookies.token || req.header('Authorization')?.replace('Bearer ', '');
 
     if (!token) {
-      return res.status(401).json({ success: false, message: 'Token bulunamadı' });
+      return res.status(401).json({ success: false, message: 'Token nicht gefunden' });
     }
 
     const user = await getCurrentUser(token);
 
-    // Optional: re-sign the token if you want to refresh the cookie
     const newToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRE,
     });
@@ -110,14 +114,13 @@ const getMe = async (req, res) => {
       });
   } catch (error) {
     console.error(error);
-    res.status(401).json({ success: false, message: error.message || 'Yetkisiz' });
+    res.status(401).json({ success: false, message: error.message || 'Nicht autorisiert' });
   }
 };
-
 
 module.exports = {
   register: registerUser,
   login: loginUser,
-  logout : logoutUser,
+  logout: logoutUser,
   getMe: getMe
 };

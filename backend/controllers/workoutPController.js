@@ -1,15 +1,26 @@
 const Workout = require('../models/workoutP');
-const CalendarEvent = require('../models/Calendar'); // CalendarEvent modelini import et
+const CalendarEvent = require('../models/Calendar');
 
+// Neues Workout erstellen
 exports.createWorkout = async (req, res) => {
-  console.log("Gelen veri:", req.body);
   try {
-    const userId = req.params.id;  // URL parametresinden user id alınır
+    const userId = req.params.id;
     if (!userId) {
-      return res.status(400).json({ message: 'Kullanıcı ID gerekli' });
+      return res.status(400).json({ message: 'Benutzer-ID erforderlich' });
     }
 
-    // req.body ile gelen workout verilerini al, user alanını ekle
+    const { name } = req.body;
+
+    // Groß- und Kleinschreibung ignorieren bei Namensprüfung
+    const existingWorkout = await Workout.findOne({
+      user: userId,
+      name: { $regex: new RegExp('^' + name + '$', 'i') }
+    });
+
+    if (existingWorkout) {
+      return res.status(400).json({ message: 'Ein Workout mit diesem Namen existiert bereits!' });
+    }
+
     const workoutData = {
       ...req.body,
       user: userId
@@ -21,28 +32,30 @@ exports.createWorkout = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Workout oluşturulamadı' });
+    res.status(500).json({ message: 'Workout konnte nicht erstellt werden' });
   }
 };
 
+// Workout löschen
 exports.deleteWorkout = async (req, res) => {
   try {
     const deleted = await Workout.findByIdAndDelete(req.params.id);
 
     if (!deleted) {
-      return res.status(404).json({ message: 'Workout bulunamadı' });
+      return res.status(404).json({ message: 'Workout wurde nicht gefunden' });
     }
 
-    // Workout silindiyse, ilgili tüm calendar kayıtlarını da sil
+    // Alle zugehörigen Kalendereinträge löschen
     await CalendarEvent.deleteMany({ workoutId: req.params.id });
 
-    res.status(200).json({ message: 'Workout ve ilgili calendar eventler silindi' });
+    res.status(200).json({ message: 'Workout und zugehörige Kalendereinträge wurden gelöscht' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Workout silinemedi' });
+    res.status(500).json({ message: 'Workout konnte nicht gelöscht werden' });
   }
 };
 
+// Workout aktualisieren
 exports.updateWorkout = async (req, res) => {
   const workoutId = req.params.id;
 
@@ -54,43 +67,20 @@ exports.updateWorkout = async (req, res) => {
     );
 
     if (!updatedWorkout) {
-      return res.status(404).json({ message: 'Workout bulunamadı' });
+      return res.status(404).json({ message: 'Workout wurde nicht gefunden' });
     }
 
     res.status(200).json(updatedWorkout);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Workout güncellenemedi' });
+    res.status(500).json({ message: 'Workout konnte nicht aktualisiert werden' });
   }
 };
 
-exports.saveWorkout = async (req, res) => {
-  try {
-    const { user, exercises, startTime, endTime } = req.body;
-
-    if (!user || !Array.isArray(exercises) || exercises.length === 0 || !startTime || !endTime) {
-      return res.status(400).json({ error: 'Eksik veya hatalı veri var' });
-    }
-
-    const workout = new Workout({
-      user,
-      exercises,
-      startTime,
-      endTime,
-    });
-
-    await workout.save();
-
-    res.status(201).json({ message: 'Workout kaydedildi', workout });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Kayıt başarısız' });
-  }
-};
-
+// Alle Workouts abrufen
 exports.getAllWorkouts = async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const userId = req.query.userId;
 
     const filter = {};
     if (userId) {
@@ -101,6 +91,6 @@ exports.getAllWorkouts = async (req, res) => {
     res.status(200).json(workouts);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Workoutlar alınamadı' });
+    res.status(500).json({ message: 'Workouts konnten nicht abgerufen werden' });
   }
 };

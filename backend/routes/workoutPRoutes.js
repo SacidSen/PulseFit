@@ -1,22 +1,25 @@
 const express = require('express');
 const router = express.Router();
-const { getAllWorkouts, createWorkout,deleteWorkout,updateWorkout,saveWorkout} = require('../controllers/workoutPController');
+const { 
+  getAllWorkouts, 
+  createWorkout, 
+  deleteWorkout, 
+  updateWorkout 
+} = require('../controllers/workoutPController');
 
-
-
-// GET: Tüm workout'ları getir
+// GET: Alle Workouts abrufen (Liste)
 router.get('/list', getAllWorkouts);
 
-// GET: Benim workout'ları getir
+// GET: Workouts des Benutzers abrufen
 router.get('/:userId', getAllWorkouts);
 
-// POST: Yeni workout oluştur
+// POST: Neues Workout erstellen
 router.post('/:id', createWorkout);
 
+// Workout löschen
 router.delete('/:id', deleteWorkout);
 
+// Workout aktualisieren
 router.put('/:id', updateWorkout);
-
-router.post('/save-workout', saveWorkout);
 
 module.exports = router;

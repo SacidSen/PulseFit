@@ -6,13 +6,13 @@ const {
   deleteCalendarEvent
 } = require('../controllers/calendarController');
 
-// Event oluşturma
+// Kalenderereignis erstellen
 router.post('/', createCalendarEvent);
 
-// Kullanıcının eventlerini getir
+// Kalenderereignisse des Benutzers abrufen
 router.get('/', getUserCalendarEvents);
 
-// Event silme
+// Kalenderereignis löschen
 router.delete('/:id', deleteCalendarEvent);
 
 module.exports = router;

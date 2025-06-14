@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// Workout modeli için şema tanımı
+// Schema-Definition für das Workout-Modell
 const workoutSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -20,10 +20,9 @@ const workoutSchema = new mongoose.Schema({
       validator: function (arr) {
         return arr.length <= 10;
       },
-      message: 'Max 10 egzersiz eklenebilir.'
+      message: 'Maximal 10 Übungen erlaubt.'
     }
   }
 });
-
 
 module.exports = mongoose.model('workoutPlan', workoutSchema);

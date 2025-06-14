@@ -1,15 +1,14 @@
 const CalendarEvent = require('../models/Calendar');
 
-
-// Kullanıcının tüm calendar eventlerini getir
+// Alle Kalenderereignisse des Benutzers abrufen
 exports.getUserCalendarEvents = async (req, res) => {
   try {
     const { userId, workoutId } = req.query;
+    
     if (!userId && !workoutId) {
-      return res.status(400).json({ message: 'userId veya workoutId gerekli' });
+      return res.status(400).json({ message: 'userId oder workoutId erforderlich' });
     }
 
-    // Doğrudan stringle eşle
     const filter = {};
     if (userId) filter.userId = userId;
     if (workoutId) filter.workoutId = workoutId;
@@ -17,22 +16,20 @@ exports.getUserCalendarEvents = async (req, res) => {
     const events = await CalendarEvent.find(filter).populate('workoutId');
     res.status(200).json(events);
   } catch (error) {
-    console.error('HATA:', error);
-    res.status(500).json({ message: 'Eventler alınamadı' });
+    console.error('FEHLER:', error);
+    res.status(500).json({ message: 'Ereignisse konnten nicht abgerufen werden' });
   }
 };
 
-
-
-
+// Neues Kalenderereignis erstellen
 exports.createCalendarEvent = async (req, res) => {
   try {
     const { userId, workoutId, start, end } = req.body;
+
     if (!userId || !workoutId || !start || !end) {
-      return res.status(400).json({ message: 'Eksik bilgi var' });
+      return res.status(400).json({ message: 'Fehlende Angaben' });
     }
 
-    // Takvim eventini oluştur
     const event = await CalendarEvent.create({
       userId,
       workoutId,
@@ -40,7 +37,6 @@ exports.createCalendarEvent = async (req, res) => {
       end,
     });
 
-    // Sadece event bilgisini dön (message yok)
     res.status(201).json({
       _id: event._id,
       workoutId: event.workoutId,
@@ -49,18 +45,18 @@ exports.createCalendarEvent = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Calendar event kaydedilemedi' });
+    res.status(500).json({ message: 'Kalenderereignis konnte nicht gespeichert werden' });
   }
 };
 
-// Event silme
+// Kalenderereignis löschen
 exports.deleteCalendarEvent = async (req, res) => {
   try {
     const { id } = req.params;
     await CalendarEvent.findByIdAndDelete(id);
-    res.status(200).json({ message: 'Event silindi' });
+    res.status(200).json({ message: 'Ereignis wurde gelöscht' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Event silinemedi' });
+    res.status(500).json({ message: 'Ereignis konnte nicht gelöscht werden' });
   }
 };

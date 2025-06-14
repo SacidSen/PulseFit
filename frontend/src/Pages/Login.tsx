@@ -29,10 +29,11 @@ export default function Login() {
       
 
      localStorage.setItem("user", JSON.stringify({
-        id: response.data.user.id,
-        email: response.data.user.email,
-        token: response.data.token
-      }));
+      id: response.data.user.id,
+      name: response.data.user.name, // <-- Bunu ekliyoruz
+      email: response.data.user.email,
+      token: response.data.token
+     }));
   
       signIn({
         auth: {
