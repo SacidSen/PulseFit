@@ -1,15 +1,26 @@
 const Workout = require('../models/workoutP');
 const CalendarEvent = require('../models/Calendar'); // CalendarEvent modelini import et
 
+// Create Workout
 exports.createWorkout = async (req, res) => {
-  console.log("Gelen veri:", req.body);
   try {
-    const userId = req.params.id;  // URL parametresinden user id alınır
+    const userId = req.params.id;
     if (!userId) {
       return res.status(400).json({ message: 'Kullanıcı ID gerekli' });
     }
 
-    // req.body ile gelen workout verilerini al, user alanını ekle
+    const { name } = req.body;
+
+    // Küçük büyük harf duyarsız kontrol
+    const existingWorkout = await Workout.findOne({
+      user: userId,
+      name: { $regex: new RegExp('^' + name + '$', 'i') }
+    });
+
+    if (existingWorkout) {
+      return res.status(400).json({ message: 'Bu isimde bir workout zaten var!' });
+    }
+
     const workoutData = {
       ...req.body,
       user: userId
@@ -25,6 +36,8 @@ exports.createWorkout = async (req, res) => {
   }
 };
 
+
+// Delete Workout
 exports.deleteWorkout = async (req, res) => {
   try {
     const deleted = await Workout.findByIdAndDelete(req.params.id);
@@ -43,6 +56,7 @@ exports.deleteWorkout = async (req, res) => {
   }
 };
 
+// update Workout
 exports.updateWorkout = async (req, res) => {
   const workoutId = req.params.id;
 
@@ -63,34 +77,10 @@ exports.updateWorkout = async (req, res) => {
     res.status(500).json({ message: 'Workout güncellenemedi' });
   }
 };
-
-exports.saveWorkout = async (req, res) => {
-  try {
-    const { user, exercises, startTime, endTime } = req.body;
-
-    if (!user || !Array.isArray(exercises) || exercises.length === 0 || !startTime || !endTime) {
-      return res.status(400).json({ error: 'Eksik veya hatalı veri var' });
-    }
-
-    const workout = new Workout({
-      user,
-      exercises,
-      startTime,
-      endTime,
-    });
-
-    await workout.save();
-
-    res.status(201).json({ message: 'Workout kaydedildi', workout });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Kayıt başarısız' });
-  }
-};
-
+// Get All Workouts
 exports.getAllWorkouts = async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const userId = req.query.userId;
 
     const filter = {};
     if (userId) {

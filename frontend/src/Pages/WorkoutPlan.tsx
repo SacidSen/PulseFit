@@ -13,8 +13,6 @@ interface Workout {
   _id: string;
   name: string;
   startDate: string;
-  endDate: string;
-  startTime: string;
   endTime: string;
   exercises: Exercise[];
   onDelete: (id: string) => void;
@@ -36,17 +34,13 @@ export default function ExercisePage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [workoutName, setWorkoutName] = useState("Your Workout Plan");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
   const modalRef = useRef<HTMLDivElement>(null);
   const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editingWorkoutId, setEditingWorkoutId] = useState<string | null>(null);
-
   const filteredExercises = exercises.filter((ex) =>
     ex.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
   const lastPostIndex = currentPage * postsPerPage;
   const firstPostIndex = lastPostIndex - postsPerPage;
   const currentExercise = filteredExercises.slice(firstPostIndex, lastPostIndex);
@@ -68,8 +62,6 @@ export default function ExercisePage() {
 
   const handleEditWorkout = (workout: Workout) => {
     setWorkoutName(workout.name);
-    setStartDate(workout.startDate.slice(0, 10)); // Ensure YYYY-MM-DD
-    setEndDate(workout.endDate.slice(0, 10));
     setSelectedExercises(workout.exercises.map((ex) => ex._id));
     setEditingWorkoutId(workout._id);
     setIsEditing(true);
@@ -127,8 +119,6 @@ export default function ExercisePage() {
       user: user.id,
       name: workoutName,
       exercises: selectedExercises,
-      startDate,
-      endDate,
       startTime: "08:00",
       endTime: "09:00",
     };
@@ -141,8 +131,6 @@ export default function ExercisePage() {
             ? {
                 ...w,
                 name: workoutName,
-                startDate,
-                endDate,
                 startTime: "08:00",
                 endTime: "09:00",
                 exercises: exercises.filter((ex) => selectedExercises.includes(ex._id)),
@@ -160,8 +148,6 @@ export default function ExercisePage() {
       setShowExercise(false);
       setSelectedExercises([]);
       setWorkoutName("Your Workout Plan");
-      setStartDate("");
-      setEndDate("");
       setEditingWorkoutId(null);
       setIsEditing(false);
     } catch (error: any) {
@@ -200,9 +186,6 @@ export default function ExercisePage() {
               key={workout._id}
               workoutName={workout.name}
               startDate={workout.startDate}
-              endDate={workout.endDate}
-              startTime={workout.startTime}
-              endTime={workout.endTime}
               exercises={workout.exercises}
               onDelete={() => handleDeleteWorkout(workout._id)}
               onEdit={() => handleEditWorkout(workout)}
@@ -253,22 +236,6 @@ export default function ExercisePage() {
                     onChange={handleExerciseChange}
                   />
                 ))}
-
-                <div className="flex mx-4 justify-center w-full mt-4">
-                  <input
-                    type="date"
-                    className="date-picker text-white border rounded px-2 w-1/2 cursor-pointer"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                  />
-                  <p className="mx-2 text-white">to</p>
-                  <input
-                    type="date"
-                    className="date-picker text-white border rounded px-2 w-1/2 cursor-pointer"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                  />
-                </div>
 
                 <button
                   type="submit"

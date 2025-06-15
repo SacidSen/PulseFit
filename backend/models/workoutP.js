@@ -20,21 +20,7 @@ const workoutSchema = new mongoose.Schema({
       validator: function (arr) {
         return arr.length <= 10;
       },
-      message: 'Max 10 egzersiz eklenebilir.'
-    }
-  },
-  startDate: {
-    type: Date,
-    required: false
-  },
-  endDate: {
-    type: Date,
-    required: true,
-    validate: {
-      validator: function (value) {
-        return !this.startDate || value >= this.startDate;
-      },
-      message: 'Bitiş tarihi başlangıç tarihinden önce olamaz.'
+      message: 'Maximal 10 Übungen erlaubt.'
     }
   }
 });

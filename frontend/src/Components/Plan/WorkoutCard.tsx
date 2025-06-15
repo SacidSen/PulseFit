@@ -1,21 +1,14 @@
-import dayjs from 'dayjs';
 import { useMemo } from 'react';
 
 interface WorkoutCardProps {
     workoutName: string;
     startDate: string;
-    endDate: string;
-    startTime: string;
-    endTime: string;
     exercises: any[];
     onDelete: () => void;
     onEdit: () => void;
 }
 
-export default function WorkoutCard({ workoutName, startDate, endDate, onDelete, onEdit }: WorkoutCardProps) {
-    const start = dayjs(startDate);
-    const end = dayjs(endDate);
-    const durationWeeks = Math.ceil(end.diff(start, 'day') / 7);
+export default function WorkoutCard({ workoutName, onDelete, onEdit }: WorkoutCardProps) {
     const randomImage = useMemo(() => {
         const imageIndex = Math.floor(Math.random() * 3) + 1;
         return `/Workout_Image-${imageIndex}.png`;
@@ -45,14 +38,6 @@ export default function WorkoutCard({ workoutName, startDate, endDate, onDelete,
                             </svg>
                             {/* <p>{gender}</p> */}
                             <p className="font-semibold text-sm ml-1">Female, Male </p>
-                        </div>
-                        <div className="flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="16" fill="currentColor" className="bi bi-clock" viewBox="0 0 16 16">
-                            <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z"/>
-                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0"/>
-                            </svg>
-                            {/* <p>{consistency}</p> */}
-                            <p className="font-semibold text-sm ml-1">{durationWeeks} week{durationWeeks > 1 ? 's' : ''}</p>
                         </div>
                     </div>
                     <div className="flex w-full justify-end my-4">

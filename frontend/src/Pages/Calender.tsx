@@ -133,7 +133,7 @@ export default function Calendar() {
     const endDate = new Date(startDate);
     endDate.setHours(startDate.getHours() + 1);
 
-    // --------------- BACKEND'E GÖNDER -----------------
+    // --------------- Send Backend -----------------
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     fetch('http://localhost:8000/api/calendar', {
       method: 'POST',
@@ -151,7 +151,7 @@ export default function Calendar() {
         setEvents(prev => [
           ...prev,
           {
-            id: data._id,  // Sadece backend'den gelen gerçek id
+            id: data._id,  
             title: selectedWorkout.name,
             start: startDate,
             end: endDate,
@@ -162,7 +162,7 @@ export default function Calendar() {
       .catch(err => {
         console.error("Takvim event'i kaydedilemedi:", err);
       });
-    // --------------- BACKEND'E GÖNDER BİTTİ -----------------
+    
   }
 
   function handleEventClick(clickInfo: any) {
@@ -184,7 +184,7 @@ export default function Calendar() {
 
   return (
     <main className="w-full grow mt-24 relative">
-      {/* Workout plan isimlerini başlık altında göster veya mesajı göster */}
+      {/* Workout-Plan-Namen unter der Überschrift anzeigen oder eine Nachricht anzeigen */}
       {noWorkoutsMessage ? (
         <div className="mb-4 p-4 bg-white rounded shadow text-center text-gray-500">
           {noWorkoutsMessage}
@@ -192,7 +192,7 @@ export default function Calendar() {
       ) : allWorkoutPlans.length > 0 && (
         <div className="mb-4 p-4 bg-white rounded shadow">
           <p className="font-semibold mb-2">
-            Lütfen eklemek istediğiniz workout planın adını seçin:
+            Bitte wählen Sie den Namen des Workout-Plans, den Sie hinzufügen möchten:
           </p>
           <ul className="list-disc list-inside">
             {allWorkoutPlans.map((w) => (

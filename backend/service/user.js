@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-
+// get current user from token
 const getCurrentUser = async (token) => {
   try {
     if (!token) {

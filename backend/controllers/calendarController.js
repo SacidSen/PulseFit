@@ -1,7 +1,7 @@
 const CalendarEvent = require('../models/Calendar');
 
 
-// Kullanıcının tüm calendar eventlerini getir
+// Alle Kalenderereignisse des Benutzers abrufen
 exports.getUserCalendarEvents = async (req, res) => {
   try {
     const { userId, workoutId } = req.query;
@@ -9,7 +9,7 @@ exports.getUserCalendarEvents = async (req, res) => {
       return res.status(400).json({ message: 'userId veya workoutId gerekli' });
     }
 
-    // Doğrudan stringle eşle
+  
     const filter = {};
     if (userId) filter.userId = userId;
     if (workoutId) filter.workoutId = workoutId;
@@ -23,8 +23,6 @@ exports.getUserCalendarEvents = async (req, res) => {
 };
 
 
-
-
 exports.createCalendarEvent = async (req, res) => {
   try {
     const { userId, workoutId, start, end } = req.body;
@@ -32,7 +30,7 @@ exports.createCalendarEvent = async (req, res) => {
       return res.status(400).json({ message: 'Eksik bilgi var' });
     }
 
-    // Takvim eventini oluştur
+    // Calendar erstellen
     const event = await CalendarEvent.create({
       userId,
       workoutId,
@@ -40,7 +38,6 @@ exports.createCalendarEvent = async (req, res) => {
       end,
     });
 
-    // Sadece event bilgisini dön (message yok)
     res.status(201).json({
       _id: event._id,
       workoutId: event.workoutId,
@@ -53,7 +50,7 @@ exports.createCalendarEvent = async (req, res) => {
   }
 };
 
-// Event silme
+// Event Loeschen
 exports.deleteCalendarEvent = async (req, res) => {
   try {
     const { id } = req.params;

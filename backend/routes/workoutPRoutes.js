@@ -4,19 +4,17 @@ const { getAllWorkouts, createWorkout,deleteWorkout,updateWorkout,saveWorkout} =
 
 
 
-// GET: Tüm workout'ları getir
+// get All Workouts
 router.get('/list', getAllWorkouts);
 
-// GET: Benim workout'ları getir
+// get All Workouts by User ID
 router.get('/:userId', getAllWorkouts);
 
-// POST: Yeni workout oluştur
+// post New Workout
 router.post('/:id', createWorkout);
-
+// delete Workout
 router.delete('/:id', deleteWorkout);
-
+// save Workout
 router.put('/:id', updateWorkout);
-
-router.post('/save-workout', saveWorkout);
 
 module.exports = router;

@@ -2,6 +2,7 @@ const User = require('../models/user');
 const getCurrentUser = require('../service/user');
 const jwt = require('jsonwebtoken');
 
+// Generieren Token
 const generateToken = async (user, statusCode, res) => {
   const token = await user.jwtGenerateToken();
 
@@ -23,7 +24,7 @@ const generateToken = async (user, statusCode, res) => {
       }
     });
 };
-
+// Register User
 const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -47,6 +48,7 @@ const registerUser = async (req, res) => {
   }
 };
 
+// Login User
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -56,7 +58,8 @@ const loginUser = async (req, res) => {
       return res.status(404).json({ message: 'Kullanıcı bulunamadı' });
     }
 
-    if (user.password !== password) {
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) {
       return res.status(401).json({ message: 'Şifre yanlış' });
     }
 
@@ -66,6 +69,7 @@ const loginUser = async (req, res) => {
     res.status(500).json({ error: 'Sunucu hatası' });
   }
 };
+// Logout User
 const logoutUser = async(req,res) => {  
   res.clearCookie('');
   res.status(200).json({
@@ -75,7 +79,7 @@ const logoutUser = async(req,res) => {
   
 };
 
-
+// Get current user
 const getMe = async (req, res) => {
   try {
     const token = req.cookies.token || req.header('Authorization')?.replace('Bearer ', '');
