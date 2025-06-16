@@ -49,19 +49,19 @@ export default function Calendar() {
           setNoWorkoutsMessage('');
         } else {
           setAllWorkoutPlans([]);
-          setNoWorkoutsMessage('Henüz workout oluşturulmadı.');
+          setNoWorkoutsMessage('Keine Workouts gefunden. Bitte erstellen Sie zuerst einen Workout-Plan.');
         }
       })
       .catch((err) => {
         console.error(err);
         setAllWorkoutPlans([]);
-        setNoWorkoutsMessage('Henüz workout oluşturulmadı.');
+        setNoWorkoutsMessage('Fehler beim Abrufen der Workouts. Bitte versuchen Sie es später erneut.');
       });
     // Takvim etkinliklerini yükle
   fetch(`http://localhost:8000/api/calendar?userId=${userId}`)
     .then(res => res.json())
     .then(eventsFromBackend => {
-      console.log(">>> Backend'den gelen takvim eventleri:", eventsFromBackend);
+      
       const eventsForCalendar = eventsFromBackend.map((e: any) => ({
         id: e._id,
         title: e.workoutId?.name || "Workout",
@@ -115,19 +115,19 @@ export default function Calendar() {
 
   function handleDateSelect(selectInfo: any) {
     if (allWorkoutPlans.length === 0) {
-      alert("Önce workout oluşturmalısınız!");
+      alert("Bitte erstellen Sie zuerst einen Workout-Plan.");
       return;
     }
 
     const selectedName = prompt(
-      'Lütfen eklemek istediğiniz workout planın adını seçin:\n' +
+      'Bitte wählen sie einen Workout aus \n' +
         allWorkoutPlans.map((w) => w.name).join('\n')
     );
 
-    if (!selectedName) return alert('Seçim yapılmadı.');
+    if (!selectedName) return alert('Keinen Workout-Plan ausgewählt');
 
     const selectedWorkout = allWorkoutPlans.find((w) => w.name === selectedName);
-    if (!selectedWorkout) return alert('Workout bulunamadı');
+    if (!selectedWorkout) return alert('Workout ist nicht gefunden');
 
     const startDate = new Date(selectInfo.startStr);
     const endDate = new Date(startDate);
@@ -147,7 +147,7 @@ export default function Calendar() {
     })
       .then(res => res.json())
       .then(data => {
-        console.log("Takvim event'i kaydedildi:", data);
+        console.log("Calender event ist gespeichert", data);
         setEvents(prev => [
           ...prev,
           {
@@ -160,23 +160,23 @@ export default function Calendar() {
         ]);
       })
       .catch(err => {
-        console.error("Takvim event'i kaydedilemedi:", err);
+        console.error("Calendar event leider nicht geschpeichert", err);
       });
     
   }
 
   function handleEventClick(clickInfo: any) {
-    if (window.confirm(`Bu etkinliği silmek istediğinize emin misiniz? '${clickInfo.event.title}'`)) {
+    if (window.confirm(`Möchten Sie dieses Ereignis wirklich löschen? '${clickInfo.event.title}'`)) {
       fetch(`http://localhost:8000/api/calendar/${clickInfo.event.id}`, {
         method: 'DELETE'
       })
         .then(res => {
-          if (!res.ok) throw new Error('Veritabanından silinemedi');
+          if (!res.ok) throw new Error('Das Löschen aus der Datenbank ist fehlgeschlagen.');
           setEvents(prev => prev.filter(evt => evt.id !== clickInfo.event.id));
           clickInfo.event.remove();
         })
         .catch(err => {
-          alert("Veritabanından silinirken hata oluştu!");
+          alert("Beim Löschen aus der Datenbank ist ein Fehler aufgetreten.!");
           console.error(err);
         });
     }
