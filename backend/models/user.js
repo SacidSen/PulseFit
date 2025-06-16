@@ -3,37 +3,38 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
 const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    trim: true,
-    required: [true, 'Bitte geben Sie einen Namen ein'],
-    maxlength: 32
-  },
+name: {
+       type: String,
+       trim: true,
+       required : [true, 'Please add a Name'],
+       maxlength: 32
+   },
 
-  email: {
+email: {
     type: String,
     trim: true,
-    required: [true, 'Bitte geben Sie eine E-Mail-Adresse ein'],
+    required : [true, 'Please add a E-mail'],
     unique: true,
     match: [
-      /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-      'Bitte geben Sie eine gültige E-Mail-Adresse ein'
+        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+        'Please add a valid E-mail'
     ]
-  },
 
-  password: {
+},
+
+password: {
     type: String,
     trim: true,
-    required: [true, 'Bitte geben Sie ein Passwort ein'],
-    minlength: [6, 'Das Passwort muss mindestens 6 Zeichen lang sein'],
+    required : [true, 'Please add a Password'],
+    minlength: [6, 'password must have at least six(6) characters'],
     match: [
-      /^(?=.*\d)(?=.*[@#\-_$%^&+=§!\?])(?=.*[a-z])(?=.*[A-Z])[0-9A-Za-z@#\-_$%^&+=§!\?]+$/,
-      'Das Passwort muss mindestens einen Großbuchstaben, einen Kleinbuchstaben, eine Zahl und ein Sonderzeichen enthalten'
+        /^(?=.*\d)(?=.*[@#\-_$%^&+=§!\?])(?=.*[a-z])(?=.*[A-Z])[0-9A-Za-z@#\-_$%^&+=§!\?]+$/,
+        'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number and a special characters'
     ]
-  }
+}
 });
 
-// Passwort hashen vor dem Speichern
+// Şifre kaydedilmeden önce hashle
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
     return next();
@@ -44,17 +45,17 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-// Passwortvergleich bei der Anmeldung
+// Kullanıcı girişinde şifre karşılaştır
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-// JWT-Token generieren
+// get the token
 userSchema.methods.jwtGenerateToken = function () {
   return jwt.sign(
     { id: this._id, email: this.email },
-    process.env.JWT_SECRET,  // <-- Burada artık .env üzerinden okunmalı!
-    { expiresIn: process.env.JWT_EXPIRE || '1h' }
+    'senin_jwt_secret_keyin', // bu secret .env dosyasına taşınmalı
+    { expiresIn: '1h' } // Token 1 saat geçerli
   );
 };
 

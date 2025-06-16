@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// Schema-Definition für das Workout-Modell
+// Workout modeli için şema tanımı
 const workoutSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -24,5 +24,6 @@ const workoutSchema = new mongoose.Schema({
     }
   }
 });
+
 
 module.exports = mongoose.model('workoutPlan', workoutSchema);

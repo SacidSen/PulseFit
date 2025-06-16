@@ -34,7 +34,7 @@ export default function Calendar() {
   const [tooltipContent, setTooltipContent] = useState<string>('');
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showTooltip, setShowTooltip] = useState(false);
-  const [noWorkoutsMessage, setNoWorkoutsMessage] = useState('');
+  const [noWorkoutsMessage, setNoWorkoutsMessage] = useState(''); // <-- eklendi
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -49,28 +49,28 @@ export default function Calendar() {
           setNoWorkoutsMessage('');
         } else {
           setAllWorkoutPlans([]);
-          setNoWorkoutsMessage('Henüz workout oluşturulmadı.');
+          setNoWorkoutsMessage('Keine Workouts gefunden. Bitte erstellen Sie zuerst einen Workout-Plan.');
         }
       })
       .catch((err) => {
         console.error(err);
         setAllWorkoutPlans([]);
-        setNoWorkoutsMessage('Henüz workout oluşturulmadı.');
+        setNoWorkoutsMessage('Fehler beim Abrufen der Workouts. Bitte versuchen Sie es später erneut.');
       });
+    // Takvim etkinliklerini yükle
+  fetch(`http://localhost:8000/api/calendar?userId=${userId}`)
+    .then(res => res.json())
+    .then(eventsFromBackend => {
       
-    fetch(`http://localhost:8000/api/calendar?userId=${userId}`)
-      .then(res => res.json())
-      .then(eventsFromBackend => {
-        console.log(">>> Backend'den gelen takvim eventleri:", eventsFromBackend);
-        const eventsForCalendar = eventsFromBackend.map((e: any) => ({
-          id: e._id,
-          title: e.workoutId?.name || "Workout",
-          start: new Date(e.start),
-          end: new Date(e.end),
-          allDay: false,
-        }));
-        setEvents(eventsForCalendar);
-      });
+      const eventsForCalendar = eventsFromBackend.map((e: any) => ({
+        id: e._id,
+        title: e.workoutId?.name || "Workout",
+        start: new Date(e.start),
+        end: new Date(e.end),
+        allDay: false,
+      }));
+      setEvents(eventsForCalendar);
+    });
   }, []);
 
   function renderEventContent(eventInfo: any) {
@@ -93,11 +93,11 @@ export default function Calendar() {
         <div>
           <h1 style="font-weight:bold; margin-bottom: 4px;">${workout.name}</h1>
           ${workout.exercises
-          .map(
-            (ex) =>
-              `<div style="margin-bottom:2px;">${ex.name} - ${ex.sets ?? "-"}x${ex.reps ?? "-"}</div>`
-          )
-          .join('')}
+            .map(
+              (ex) =>
+                `<div style="margin-bottom:2px;">${ex.name} - ${ex.sets ?? "-"}x${ex.reps ?? "-"}</div>`
+            )
+            .join('')}
         </div>
       `;
       setTooltipContent(content);
@@ -109,27 +109,31 @@ export default function Calendar() {
     setTooltipPosition({ x: e.pageX + 10, y: e.pageY + 10 });
   }
 
+  function handleEvents(eventsList: any) {
+    // FullCalendar'ın state güncellemesi gerekirse kullanılabilir
+  }
+
   function handleDateSelect(selectInfo: any) {
     if (allWorkoutPlans.length === 0) {
-      alert("Önce workout oluşturmalısınız!");
+      alert("Bitte erstellen Sie zuerst einen Workout-Plan.");
       return;
     }
 
     const selectedName = prompt(
-      'Lütfen eklemek istediğiniz workout planın adını seçin:\n' +
-      allWorkoutPlans.map((w) => w.name).join('\n')
+      'Bitte wählen sie einen Workout aus \n' +
+        allWorkoutPlans.map((w) => w.name).join('\n')
     );
 
-    if (!selectedName) return alert('Seçim yapılmadı.');
+    if (!selectedName) return alert('Keinen Workout-Plan ausgewählt');
 
     const selectedWorkout = allWorkoutPlans.find((w) => w.name === selectedName);
-    if (!selectedWorkout) return alert('Workout bulunamadı');
+    if (!selectedWorkout) return alert('Workout ist nicht gefunden');
 
     const startDate = new Date(selectInfo.startStr);
     const endDate = new Date(startDate);
     endDate.setHours(startDate.getHours() + 1);
 
-    // --------------- BACKEND'E GÖNDER -----------------
+    // --------------- Send Backend -----------------
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     fetch('http://localhost:8000/api/calendar', {
       method: 'POST',
@@ -143,11 +147,11 @@ export default function Calendar() {
     })
       .then(res => res.json())
       .then(data => {
-        console.log("Takvim event'i kaydedildi:", data);
+        console.log("Calender event ist gespeichert", data);
         setEvents(prev => [
           ...prev,
           {
-            id: data._id,  // Sadece backend'den gelen gerçek id
+            id: data._id,  
             title: selectedWorkout.name,
             start: startDate,
             end: endDate,
@@ -156,31 +160,31 @@ export default function Calendar() {
         ]);
       })
       .catch(err => {
-        console.error("Takvim event'i kaydedilemedi:", err);
+        console.error("Calendar event leider nicht geschpeichert", err);
       });
-    // --------------- BACKEND'E GÖNDER BİTTİ -----------------
+    
   }
 
   function handleEventClick(clickInfo: any) {
-    if (window.confirm(`Bu etkinliği silmek istediğinize emin misiniz? '${clickInfo.event.title}'`)) {
+    if (window.confirm(`Möchten Sie dieses Ereignis wirklich löschen? '${clickInfo.event.title}'`)) {
       fetch(`http://localhost:8000/api/calendar/${clickInfo.event.id}`, {
         method: 'DELETE'
       })
         .then(res => {
-          if (!res.ok) throw new Error('Veritabanından silinemedi');
+          if (!res.ok) throw new Error('Das Löschen aus der Datenbank ist fehlgeschlagen.');
           setEvents(prev => prev.filter(evt => evt.id !== clickInfo.event.id));
           clickInfo.event.remove();
         })
         .catch(err => {
-          alert("Veritabanından silinirken hata oluştu!");
+          alert("Beim Löschen aus der Datenbank ist ein Fehler aufgetreten.!");
           console.error(err);
         });
     }
   }
 
   return (
-    <main className="w-full grow mt-24 relative mb-20">
-      {/* Workout plan isimlerini başlık altında göster veya mesajı göster */}
+    <main className="w-full grow mt-24 relative">
+      {/* Workout-Plan-Namen unter der Überschrift anzeigen oder eine Nachricht anzeigen */}
       {noWorkoutsMessage ? (
         <div className="mb-4 p-4 bg-white rounded shadow text-center text-gray-500">
           {noWorkoutsMessage}
@@ -188,7 +192,7 @@ export default function Calendar() {
       ) : allWorkoutPlans.length > 0 && (
         <div className="mb-4 p-4 bg-white rounded shadow">
           <p className="font-semibold mb-2">
-            Lütfen eklemek istediğiniz workout planın adını seçin:
+            Bitte wählen Sie den Namen des Workout-Plans, den Sie hinzufügen möchten:
           </p>
           <ul className="list-disc list-inside">
             {allWorkoutPlans.map((w) => (
@@ -199,31 +203,32 @@ export default function Calendar() {
       )}
 
       <div className='h-[700px]'>
-        <FullCalendar
-          plugins={[timeGridPlugin, interactionPlugin]}
-          headerToolbar={false}
-          initialView="timeGridWeek"
-          allDaySlot={false}
-          slotDuration="01:00:00"
-          height="100%"
-          expandRows={true}
-          slotMinTime="06:00:00"
-          slotMaxTime="24:00:00"
-          slotLabelFormat={{ hour: 'numeric', minute: '2-digit', hour12: false }}
-          dayHeaderFormat={{ weekday: 'long' }}
-          slotLabelClassNames="text-gray-400 text-lg"
-          dayCellClassNames="bg-white border border-gray-200"
-          select={handleDateSelect}
-          editable={false}
-          selectable={true}
-          selectMirror={false}
-          dayMaxEvents={true}
-          weekends={weekendsVisible}
-          eventClick={handleEventClick}
-          events={events}
-          eventContent={renderEventContent}
-          eventClassNames="bg-blue-500 bg-opacity-60 text-white border border-blue-400"
-        />
+      <FullCalendar
+        plugins={[timeGridPlugin, interactionPlugin]}
+        headerToolbar={false}
+        initialView="timeGridWeek"
+        allDaySlot={false}
+        slotDuration="01:00:00"
+        height="100%"
+        expandRows={true}
+        slotMinTime="06:00:00"
+        slotMaxTime="24:00:00"
+        slotLabelFormat={{ hour: 'numeric', minute: '2-digit', hour12: false }}
+        dayHeaderFormat={{ weekday: 'long' }}
+        slotLabelClassNames="text-gray-400 text-lg"
+        dayCellClassNames="bg-white border border-gray-200"
+        select={handleDateSelect}
+        editable={false}
+        selectable={true}
+        selectMirror={false}
+        dayMaxEvents={true}
+        weekends={weekendsVisible}
+        eventClick={handleEventClick}
+        eventsSet={handleEvents}
+        events={events}
+        eventContent={renderEventContent}
+        eventClassNames="bg-blue-500 bg-opacity-60 text-white border border-blue-400"
+      />
       </div>
 
       {showTooltip && (

@@ -2,16 +2,16 @@ const express = require('express');
 const router = express.Router();
 const exerciseController = require('../controllers/exerciseController');
 
-// Tüm egzersizleri getir
+// get All Exercises
 router.get('/:id', exerciseController.getAllExercises);
 
-// Yeni egzersiz oluştur
+// create New Exercise
 router.post('/', exerciseController.createExercise);
 
-// Egzersizi güncelle
+// update Exercise
 router.put('/:id', exerciseController.updateExercise);
 
-// Egzersizi sil
+// delete Exercise
 router.delete('/:id', exerciseController.deleteExercise);
 
 

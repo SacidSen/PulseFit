@@ -1,4 +1,4 @@
-require('dotenv').config(); // .env dosyasını yükler
+require('dotenv').config(); // .env file loading
 
 const express = require('express');
 const mongoose = require('mongoose');
@@ -34,20 +34,20 @@ app.use('/api/workoutP', workoutPRoutes);
 app.use('/api/exercise', exerciseRoutes);
 app.use('/api/calendar', calendarRoutes);
 
-// --- HATA YAKALAMA ---
+// --- Error Handler ---
 app.use(errorHandler);
 
-// --- VERİTABANI BAĞLANTISI ---
+// --- Database Connection ---
 const dbURI = process.env.DATABASE;
 mongoose.connect(dbURI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
-  .then(() => console.log('MongoDB bağlantısı başarılı'))
-  .catch(err => console.error('MongoDB bağlantı hatası:', err));
+  .then(() => console.log('MongoDB-Verbindung erfolgreich'))
+  .catch(err => console.error('MongoDB-Verbindungsfehler:', err));
 
-// --- SERVER BAŞLAT ---
+// --- SERVER Start ---
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server ${PORT} portunda çalışıyor`);
+  console.log(`Server läuft auf Port ${PORT}`);
 });
