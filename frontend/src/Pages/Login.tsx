@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [email, setEmail] = useState("faco@gmail.com");
-  const [password, setPassword] = useState("Stron1!");
+  const [password, setPassword] = useState("StrongPass1!");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const signIn = useSignIn();
@@ -29,10 +29,11 @@ export default function Login() {
       
 
      localStorage.setItem("user", JSON.stringify({
-        id: response.data.user.id,
-        email: response.data.user.email,
-        token: response.data.token
-      }));
+      id: response.data.user.id,
+      name: response.data.user.name, // <-- Bunu ekliyoruz
+      email: response.data.user.email,
+      token: response.data.token
+     }));
   
       signIn({
         auth: {

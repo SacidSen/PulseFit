@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { register, login,logout, getMe} = require('../controllers/userController');
-const User = require('../models/user'); // sadece test amaçlı route için lazım olabilir
+const User = require('../models/user'); 
 
 
 router.post('/register', register);

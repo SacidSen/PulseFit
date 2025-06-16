@@ -88,13 +88,20 @@ export default function ExercisePage() {
   }, []);
 
   useEffect(() => {
-    if (user) {
-      axios
-        .get(`http://localhost:8000/api/workoutP/${user.id}`)
-        .then((res) => setWorkouts(res.data))
-        .catch((err) => console.error("Workout fetch error:", err));
-    }
-  }, [user]);
+  const storedUser = localStorage.getItem("user");
+  if (storedUser) {
+    setUser(JSON.parse(storedUser));
+  }
+}, []);
+
+useEffect(() => {
+  if (!user) return;
+
+  axios
+    .get(`http://localhost:8000/api/workoutP/list?userId=${user.id}`)
+    .then((res) => setWorkouts(res.data))
+    .catch((err) => console.error("Workout fetch error:", err));
+}, [user]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
